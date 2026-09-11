@@ -1,0 +1,60 @@
+/* =========================================================
+   ExtractedFacts
+   ========================================================= */
+
+.extracted-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.extracted-grid {
+  /* Reuses .summary-grid and .summary-item from RiskAssessment.css */
+}
+
+.value-warning {
+  color: var(--color-risk-medium) !important;
+  font-weight: 600 !important;
+}
+
+.extracted-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.source-indicator {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+  background: var(--color-grey-50);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-grey-200);
+}
+
+.facts-toggle {
+  font-size: 0.85rem;
+  color: var(--color-brand-600);
+  background: none;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  transition: all var(--duration-fast);
+}
+
+.facts-toggle:hover {
+  background: var(--color-brand-50);
+  color: var(--color-brand-700);
+}
+
+@media (max-width: 640px) {
+  .extracted-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+}

@@ -1,0 +1,120 @@
+/* =========================================================
+   EvidenceCard
+   ========================================================= */
+
+.evidence-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-xs);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── Left colored border for severity ── */
+.evidence-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 4px;
+}
+
+.ev-high::before { background: var(--color-risk-high); }
+.ev-medium::before { background: var(--color-risk-medium); }
+.ev-low::before { background: var(--color-risk-low); }
+
+/* ── Header (Severity + Points) ── */
+.ev-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.ev-severity-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.ev-high .ev-severity-badge { color: var(--color-risk-high); background: var(--color-risk-high-badge); }
+.ev-medium .ev-severity-badge { color: var(--color-risk-medium); background: var(--color-risk-medium-badge); }
+.ev-low .ev-severity-badge { color: var(--color-risk-low); background: var(--color-risk-low-badge); }
+
+.ev-points {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+}
+.ev-high .ev-points { color: var(--color-risk-high); }
+.ev-medium .ev-points { color: var(--color-risk-medium); }
+.ev-low .ev-points { color: var(--color-text-primary); }
+
+.ev-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+}
+
+/* ── Body (Evidence blocks) ── */
+.ev-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.ev-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ev-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ev-quote {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  background: var(--color-grey-50);
+  padding: 10px 14px;
+  border-left: 3px solid var(--color-grey-300);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  margin: 0;
+  font-style: italic;
+}
+
+.ev-explanation {
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.ev-source-block {
+  margin-top: 4px;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.ev-source-text {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}

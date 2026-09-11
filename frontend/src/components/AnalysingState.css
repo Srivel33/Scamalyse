@@ -1,0 +1,125 @@
+/* =========================================================
+   AnalysingState (Investigation UI)
+   ========================================================= */
+
+.analysing-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-12) var(--space-4);
+  min-height: 60vh;
+}
+
+.analysing-card {
+  width: 100%;
+  max-width: 500px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  box-shadow: var(--shadow-sm);
+  text-align: left;
+}
+
+.analysing-heading {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 8px;
+}
+
+.analysing-sub {
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin-bottom: var(--space-8);
+}
+
+/* ── Progress System ── */
+.progress-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.progress-step {
+  display: flex;
+  gap: 16px;
+}
+
+.progress-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 24px;
+}
+
+.progress-node {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--color-grey-100);
+  color: var(--color-text-disabled);
+  border: 1px solid var(--color-grey-200);
+  font-size: 0.65rem;
+  font-weight: 700;
+  z-index: 2;
+  transition: all var(--duration-normal) ease;
+}
+
+.progress-line {
+  width: 2px;
+  flex: 1;
+  background: var(--color-grey-100);
+  min-height: 24px;
+  margin: 4px 0;
+  transition: background var(--duration-normal) ease;
+}
+
+.progress-content {
+  padding-top: 2px;
+  padding-bottom: 24px;
+}
+.progress-step:last-child .progress-content {
+  padding-bottom: 0;
+}
+
+.progress-label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-text-disabled);
+  transition: color var(--duration-normal) ease;
+}
+
+/* ── States ── */
+.progress-step.is-done .progress-node {
+  background: var(--color-safe);
+  color: #fff;
+  border-color: var(--color-safe);
+}
+.progress-step.is-done .progress-line {
+  background: var(--color-safe-light);
+}
+.progress-step.is-done .progress-label {
+  color: var(--color-text-primary);
+}
+
+.progress-step.is-active .progress-node {
+  background: var(--color-brand-50);
+  color: var(--color-brand-700);
+  border-color: var(--color-brand-400);
+  box-shadow: 0 0 0 3px var(--color-brand-100);
+  animation: pulse-node 2s infinite;
+}
+.progress-step.is-active .progress-label {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+@keyframes pulse-node {
+  0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
+  70% { box-shadow: 0 0 0 6px rgba(37, 99, 235, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+}

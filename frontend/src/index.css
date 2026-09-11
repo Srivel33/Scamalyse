@@ -1,0 +1,167 @@
+/* =========================================================
+   ScamLens — Design System v3 (Warm Ivory)
+   Premium security product. Trust, clarity, intelligence.
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* ── Core Colors ── */
+  --color-bg-base: #F6F5F1;
+  --color-bg-secondary: #EFEEE9;
+  --color-surface: #FFFFFF;
+  
+  /* Text */
+  --color-text-primary: #17211F;
+  --color-text-secondary: #66706D;
+  --color-text-tertiary: #8A928F;
+  --color-text-disabled: #A5ABA9;
+  
+  /* Primary Accent (Teal/Green) */
+  --color-brand-100: #DDF2ED;
+  --color-brand-600: #167C73;
+  --color-brand-800: #0F5852;
+  
+  /* Greys/Neutrals (Sand shifted) */
+  --color-grey-50: #F6F5F1;
+  --color-grey-100: #EFEEE9;
+  --color-grey-200: #D9DDD9;
+  --color-grey-300: #BCC2BD;
+  --color-grey-600: #66706D;
+  --color-grey-900: #17211F;
+
+  /* States (Risk/Success) */
+  --color-safe: #23865A;
+  --color-safe-light: #E9F3EE;
+  --color-warning: #C88A24;
+  --color-warning-light: #F9F3E9;
+  --color-danger: #C94A4A;
+  --color-danger-light: #FAEDED;
+  
+  /* Semantic Risk Tokens */
+  --color-risk-low: var(--color-safe);
+  --color-risk-low-badge: var(--color-safe-light);
+  --color-risk-medium: var(--color-warning);
+  --color-risk-medium-badge: var(--color-warning-light);
+  --color-risk-high: var(--color-danger);
+  --color-risk-high-badge: var(--color-danger-light);
+
+  --color-border-subtle: #D9DDD9;
+
+  /* ── Typography ── */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  
+  /* ── Spacing ── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-8: 48px;
+  --space-10: 64px;
+  --space-12: 80px;
+  --space-16: 120px;
+  --space-20: 160px;
+
+  /* ── Radii ── */
+  --radius-sm: 6px;
+  --radius-md: 10px;    /* Inputs/Buttons */
+  --radius-lg: 12px;
+  --radius-xl: 16px;    /* Cards */
+  --radius-2xl: 20px;   /* Feature panels */
+  --radius-full: 9999px;
+
+  /* ── Shadows ── */
+  --shadow-xs: 0 1px 2px rgba(23, 32, 51, 0.04);
+  --shadow-sm: 0 2px 4px rgba(23, 32, 51, 0.04), 0 1px 2px rgba(23, 32, 51, 0.02);
+  --shadow-md: 0 4px 6px -1px rgba(23, 32, 51, 0.06), 0 2px 4px -1px rgba(23, 32, 51, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(23, 32, 51, 0.08), 0 4px 6px -2px rgba(23, 32, 51, 0.04);
+  --shadow-ring: 0 0 0 3px rgba(22, 124, 115, 0.25); /* Primary ring */
+  
+  /* ── Transitions ── */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* ── Layout ── */
+  --max-width: 800px;
+  --max-width-wide: 1120px;
+}
+
+html, body {
+  min-height: 100vh;
+  background-color: var(--color-bg-base);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+  scroll-behavior: smooth;
+}
+
+/* ── Typography Globals ── */
+h1, h2, h3, h4 {
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+}
+
+a {
+  color: var(--color-brand-600);
+  text-decoration: none;
+  transition: color var(--duration-fast);
+}
+
+/* ── Shared Animations ── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse-dot {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(36, 87, 214, 0.4); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(36, 87, 214, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(36, 87, 214, 0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s var(--ease-out) forwards;
+}
+
+.stagger-children > * {
+  opacity: 0;
+  animation: fadeIn 0.5s var(--ease-out) forwards;
+}
+.stagger-children > *:nth-child(1) { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.2s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.3s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.4s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.5s; }
+
+/* ── Accessibility Utils ── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

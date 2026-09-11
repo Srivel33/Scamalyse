@@ -1,0 +1,280 @@
+/* =========================================================
+   Info Sections & Footer (Ivory Theme)
+   ========================================================= */
+
+.info-section {
+  padding: var(--space-12) var(--space-4);
+}
+
+.info-inner {
+  max-width: var(--max-width-wide);
+  margin: 0 auto;
+}
+
+.info-section-light { background: var(--color-bg-base); }
+.info-section-subtle { background: var(--color-bg-secondary); }
+.info-section-dark { 
+  background: var(--color-bg-base); 
+  color: var(--color-text-primary);
+}
+
+.info-header-centered {
+  text-align: center;
+  margin-bottom: var(--space-8);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.info-heading {
+  font-size: 2.25rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  margin-bottom: var(--space-4);
+}
+.info-section-dark .info-heading { color: var(--color-text-primary); }
+
+.info-subheading {
+  font-size: 1.1rem;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+.info-section-dark .info-subheading { color: var(--color-text-secondary); }
+
+/* ── How it works (Dark) ── */
+.hiw-process {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-6);
+  margin-top: var(--space-10);
+}
+
+.hiw-step {
+  display: flex;
+  flex-direction: column;
+}
+
+.hiw-step-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--space-4);
+}
+
+.hiw-step-num {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-brand-400);
+  background: rgba(84, 135, 255, 0.1);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.hiw-connector {
+  flex: 1;
+  height: 2px;
+  background: var(--color-border-subtle);
+  margin-left: var(--space-3);
+  margin-right: calc(var(--space-3) * -1); /* connect to next */
+}
+
+.hiw-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.hiw-desc {
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+/* ── Purpose Grid ── */
+.purpose-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-6);
+}
+
+.purpose-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.purpose-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 50%;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-brand-600);
+  margin-bottom: var(--space-3);
+}
+
+.purpose-item h4 {
+  font-size: 1.15rem;
+  margin-bottom: 6px;
+}
+.purpose-item p {
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+/* ── Privacy Flow & Grid ── */
+.privacy-visual-flow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-xl);
+  padding: var(--space-4) var(--space-6);
+  margin-bottom: var(--space-8);
+  overflow-x: auto;
+}
+
+.pv-step {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
+}
+.pv-highlight {
+  color: var(--color-safe);
+  background: var(--color-safe-light);
+  padding: 4px 12px;
+  border-radius: var(--radius-sm);
+}
+
+.pv-divider {
+  width: 24px;
+  height: 2px;
+  background: var(--color-border-subtle);
+  flex-shrink: 0;
+  margin: 0 var(--space-3);
+}
+
+.privacy-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+}
+
+.privacy-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+}
+.privacy-card h4 {
+  font-size: 1.05rem;
+  margin-bottom: 8px;
+  color: var(--color-text-primary);
+}
+.privacy-card p {
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+}
+
+/* ── Footer ── */
+.site-footer {
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-grey-200);
+  padding: var(--space-8) var(--space-4) var(--space-4);
+}
+
+.footer-inner {
+  max-width: var(--max-width-wide);
+  margin: 0 auto;
+}
+
+.footer-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-8);
+}
+
+.footer-left {
+  max-width: 300px;
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: var(--space-3);
+}
+.footer-logo-mark { color: var(--color-brand-600); display: flex; }
+.footer-brand { font-size: 1.15rem; font-weight: 800; color: var(--color-text-primary); letter-spacing: -0.02em; }
+
+.footer-copy {
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.footer-right {
+  display: flex;
+  gap: var(--space-12);
+}
+
+.footer-links-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.footer-links-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-tertiary);
+  margin-bottom: 4px;
+}
+
+.footer-links-col a {
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+.footer-links-col a:hover { color: var(--color-brand-600); }
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-grey-200);
+}
+
+.footer-legal, .footer-disclaimer {
+  font-size: 0.85rem;
+  color: var(--color-text-tertiary);
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .hiw-process { grid-template-columns: 1fr; gap: var(--space-6); }
+  .hiw-connector { display: none; }
+  .hiw-step-header { margin-bottom: 8px; }
+  
+  .purpose-grid { grid-template-columns: 1fr; }
+  .privacy-grid { grid-template-columns: 1fr; }
+  
+  .privacy-visual-flow { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .pv-divider { width: 2px; height: 16px; margin: 4px 0 4px 12px; }
+
+  .footer-top { flex-direction: column; gap: var(--space-8); }
+  .footer-right { flex-direction: column; gap: var(--space-6); width: 100%; }
+  .footer-bottom { flex-direction: column; gap: var(--space-2); align-items: flex-start; }
+}
