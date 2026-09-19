@@ -6,7 +6,7 @@ from app.api.routes import health, analyze
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    description="Backend API foundation for ScamLens. Currently minimal MVP scope."
+    description="Scamalyse — AI-powered internship and job offer scam detection API."
 )
 
 # Set up CORS
@@ -23,7 +23,7 @@ if settings.BACKEND_CORS_ORIGINS:
 @app.get("/", tags=["root"])
 def read_root():
     return {
-        "message": "ScamLens FastAPI backend is running!",
+        "message": "Scamalyse FastAPI backend is running!",
         "docs_url": "/docs"
     }
 

@@ -38,7 +38,7 @@ export default function InfoSections() {
         <div className="info-inner">
           <div className="info-header-centered">
             <h2 className="info-heading">Built for students who don't want to guess.</h2>
-            <p className="info-subheading">ScamLens supports your decision. It does not make the decision for you.</p>
+            <p className="info-subheading">Scamalyse supports your decision. It does not make the decision for you.</p>
           </div>
           
           <div className="purpose-grid">
@@ -66,7 +66,7 @@ export default function InfoSections() {
         <div className="info-inner">
           <div className="info-header-centered">
             <h2 className="info-heading">Privacy is part of the product.</h2>
-            <p className="info-subheading">Opportunity messages can contain personal information. ScamLens is designed to minimise processing.</p>
+            <p className="info-subheading">Opportunity messages can contain personal information. Scamalyse is designed to minimise processing.</p>
           </div>
 
           <div className="privacy-visual-flow">
@@ -107,7 +107,7 @@ export default function InfoSections() {
             <div className="footer-left">
               <div className="footer-logo">
                 <span className="footer-logo-mark"><Logo width={24} height={24} /></span>
-                <span className="footer-brand">ScamLens</span>
+                <span className="footer-brand">Scamalyse</span>
               </div>
               <p className="footer-copy">
                 Verify before you apply.<br />
@@ -129,7 +129,7 @@ export default function InfoSections() {
           </div>
           
           <div className="footer-bottom">
-            <p className="footer-legal">© 2026 ScamLens</p>
+            <p className="footer-legal">© 2026 Scamalyse</p>
             <p className="footer-disclaimer">Decision support, not a guarantee of legitimacy or fraud.</p>
           </div>
         </div>

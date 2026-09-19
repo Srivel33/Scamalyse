@@ -104,7 +104,7 @@ export default function AnalyseForm({ onSubmit, onDemo }) {
         <div className="workspace-card">
           <div className="workspace-header">
             <h2 className="workspace-title">Analyse an opportunity</h2>
-            <p className="workspace-subtitle">Paste an opportunity message and ScamLens will identify important details and warning signals.</p>
+            <p className="workspace-subtitle">Paste an opportunity message and Scamalyse will identify important details and warning signals.</p>
           </div>
 
           <form onSubmit={handleSubmit} noValidate>

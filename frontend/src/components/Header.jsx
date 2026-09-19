@@ -22,11 +22,11 @@ export default function Header() {
   return (
     <header className={`site-header ${scrolled ? 'is-scrolled' : ''}`}>
       <div className="header-inner">
-        <a href="/" className="header-logo" aria-label="ScamLens home">
+        <a href="/" className="header-logo" aria-label="Scamalyse home">
           <span className="logo-mark">
             <Logo width={20} height={20} />
           </span>
-          <span className="logo-text">ScamLens</span>
+          <span className="logo-text">Scamalyse</span>
         </a>
 
         {/* Desktop nav */}

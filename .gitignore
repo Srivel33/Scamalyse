@@ -1,11 +1,24 @@
-docs/
-
-#frontend
-dist/
-node_modules/
-
-#backend
-__pycache__/
-.pytest_cache/
-venv/
+# Environment & secrets
 .env
+.env*.local
+
+# Frontend builds & dependencies
+frontend/node_modules/
+frontend/dist/
+.vite/
+
+# Backend caches & virtual environment
+backend/venv/
+backend/.pytest_cache/
+__pycache__/
+*.py[cod]
+
+# Planned local database
+*.sqlite3
+*.db
+
+# OS files
+Thumbs.db
+.DS_Store
+
+docs/

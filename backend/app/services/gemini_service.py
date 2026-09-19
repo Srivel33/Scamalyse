@@ -32,15 +32,21 @@ def extract_opportunity_facts(raw_text: str) -> GeminiExtractionSchema:
 
     redacted_text = redact_text(raw_text)
 
-    prompt = f"""You are an information extraction system for ScamLens.
+    schema_json = json.dumps(GeminiExtractionSchema.model_json_schema())
 
-Extract only facts explicitly supported by the submitted content.
-Do not determine whether the opportunity is a scam.
-Do not estimate risk.
-Do not invent missing information.
-Use "unknown" or null when information is not explicitly available.
-Every important extracted fact MUST have exact supporting evidence quoted directly from the submitted content.
-Do NOT fabricate evidence. If there is no evidence, the evidence array must be empty and the value null/"unknown".
+    prompt = f"""You are an information extraction system for Scamalyse.
+
+Extract facts from the submitted content and output ONLY a valid JSON object strictly adhering to this JSON Schema:
+{schema_json}
+
+Strict rules:
+1. Extract only facts explicitly supported by the submitted content.
+2. Do not determine whether the opportunity is a scam.
+3. Do not estimate risk.
+4. Do not invent missing information.
+5. Use "unknown" or null when information is not explicitly available.
+6. Every important extracted fact MUST have exact supporting evidence quoted directly from the submitted content.
+7. Do NOT fabricate evidence. If there is no evidence, the evidence array must be empty and the value null/"unknown".
 
 Submitted Content:
 \"\"\"
@@ -49,13 +55,11 @@ Submitted Content:
 """
 
     try:
-        # Using the currently recommended model for structured tasks in google-genai
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model=settings.GEMINI_MODEL,
             contents=prompt,
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
-                response_schema=GeminiExtractionSchema,
                 temperature=0.0, # Zero temperature for deterministic extraction
             )
         )
