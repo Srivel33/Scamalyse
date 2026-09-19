@@ -1,6 +1,105 @@
 // Mock data for demo and UI state testing.
 // Replace with real API response shape in Phase 4 (backend integration).
 
+export const PRESET_SAMPLES = [
+  {
+    id: "aicte-internship",
+    title: "AICTE Training-cum-Internship",
+    subtitle: "Aenexz Tech Google Form trap",
+    badge: "Predatory EdTech",
+    badgeType: "danger",
+    text: `Dear Students,
+Srivel T - Sns college of technology - 3 - AIML
+
+We are pleased to announce the launch of our Training, Internship & Placement Certification Program, offered in collaboration with AICTE and facilitated by Aenexz Tech alongside our MNC partners.
+
+Please submit your application early, as cohort seats are limited: 
+
+https://forms.gle/s4ywUUaPnmUzA52Z7
+
+PROGRAM HIGHLIGHTS
+Audience: Open to all graduates and freshers seeking job-ready technical skills.
+Structure: 2 months of live online technical training followed by placement assistance from Month 3 onwards.
+Career Services: Resume workshops, mock interviews, and direct placement drives with startups and corporate hiring partners.
+Recognition: Verified certification awarded upon successful program completion.
+
+ELIGIBILITY & SELECTION
+Cohorts are limited to 20-25 participants.
+Selection is conducted on a rolling basis.
+Placement assistance is reserved exclusively for candidates who complete all coursework and assessments.
+
+APPLY TODAY 
+If you have questions, feel free to reply directly to this message.
+
+Best regards,
+Admissions Team Aenexz Tech & Partnered MNCs`,
+    source: "Email",
+    appliedFirst: "no",
+  },
+  {
+    id: "amazon-laptop",
+    title: "Corporate Laptop Deposit Scam",
+    subtitle: "Fake Amazon remote job asking ₹3,500 UPI",
+    badge: "Fee Scam",
+    badgeType: "danger",
+    text: `Dear Candidate,
+
+Congratulations! Following your profile review, you have been selected for the position of Operations Associate at Amazon India Remote Support. 
+
+Monthly Compensation: ₹45,000 / month + health benefits.
+Location: 100% Work from Home.
+
+Before dispatching your company Apple MacBook Pro and work accessories, company policy mandates a refundable equipment security deposit of ₹3,500. This amount must be paid to our logistics partner via UPI ID: hr.amazonlogistics@okaxis within 2 hours to confirm your employee ID dispatch. 
+
+This deposit is 100% reimbursed on your first salary disbursement. Reply with your payment confirmation screenshot.
+
+Warm regards,
+Amazon India HR Recruitment Team
+Email: amazon.hr.recruitment2026@gmail.com`,
+    source: "Email",
+    appliedFirst: "no",
+  },
+  {
+    id: "telegram-task",
+    title: "Telegram Daily Task & YouTube Scam",
+    badge: "Task Fraud",
+    badgeType: "danger",
+    subtitle: "Like YouTube videos for daily ₹3,000",
+    text: `Part-time Job Alert for College Students! Earn ₹2,000 to ₹5,000 daily from your phone.
+
+Work involves liking YouTube videos, rating Google Maps locations, and following Instagram accounts. 
+Takes only 15-20 minutes a day. Daily instant withdrawal via UPI.
+
+We have paid ₹150 for your trial task. To unlock VIP-1 tasks and withdraw your balance, contact our regional task manager Miss Neha on Telegram @GlobalTasksVIP and deposit ₹1,000 account activation fee. Complete within 30 minutes to get 50% joining bonus!`,
+    source: "Telegram",
+    appliedFirst: "no",
+  },
+  {
+    id: "legitimate-internship",
+    title: "Legitimate Campus Internship Offer",
+    badge: "Genuine",
+    badgeType: "success",
+    subtitle: "Official Zoho offer after technical rounds",
+    text: `Dear Srivel,
+
+Following your technical interview rounds and evaluation with our Engineering team, we are pleased to offer you the Software Engineering Summer Internship at Zoho Corporation.
+
+Role: Software Development Intern
+Location: Zoho Campus, Chennai / Remote
+Duration: 3 months starting June 2026
+Stipend: ₹25,000 per month
+
+Please review your formal offer letter and employment terms by logging into our official careers portal at https://careers.zoho.com using your registered candidate credentials. 
+
+Zoho does not charge any application, registration, or equipment fees at any stage of hiring.
+
+Best regards,
+Zoho University Relations & Campus Recruitment`,
+    source: "Email",
+    appliedFirst: "yes",
+  }
+];
+
 export const DEMO_INPUT = {
   text: "Congratulations! You have been selected for a Product Optimisation Associate opportunity. Earn ₹3,000 every day by completing simple product optimisation tasks. To activate your account, pay a ₹999 registration fee. Payment can be made through USDT. Complete the activation within 30 minutes.",
   source: "WhatsApp",

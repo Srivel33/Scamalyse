@@ -102,10 +102,10 @@ VALID_MOCK_RESPONSE = {
 }
 
 def test_missing_api_key():
-    settings.GEMINI_API_KEY = None
-    with pytest.raises(GeminiExtractionError) as exc_info:
-        extract_opportunity_facts("Some text")
-    assert "GEMINI_API_KEY is not configured" in str(exc_info.value) or "missing" in str(exc_info.value)
+    with patch("app.services.gemini_service.get_available_keys", return_value=[]):
+        with pytest.raises(GeminiExtractionError) as exc_info:
+            extract_opportunity_facts("Some text")
+        assert "GEMINI_API_KEY is not configured" in str(exc_info.value) or "missing" in str(exc_info.value) or "No Gemini API keys configured" in str(exc_info.value)
 
 @patch("app.services.gemini_service.genai.Client")
 def test_valid_gemini_extraction(mock_client_class):
@@ -138,3 +138,21 @@ def test_invalid_json_schema(mock_client_class):
         extract_opportunity_facts("Dummy text")
     
     assert "SCHEMA_VALIDATION_FAILED" in str(exc_info.value)
+
+@patch("app.services.gemini_service.genai.Client")
+def test_multi_key_rotation_on_failure(mock_client_class):
+    with patch("app.services.gemini_service.get_available_keys", return_value=["key1", "key2", "key3"]):
+        # First key throws APIError (e.g. rate limit), second key succeeds
+        mock_instance_fail = MagicMock()
+        mock_instance_fail.models.generate_content.side_effect = Exception("429 ResourceExhausted: Quota exceeded")
+        
+        mock_instance_success = MagicMock()
+        mock_response = MagicMock()
+        mock_response.text = json.dumps(VALID_MOCK_RESPONSE)
+        mock_instance_success.models.generate_content.return_value = mock_response
+        
+        mock_client_class.side_effect = [mock_instance_fail, mock_instance_success]
+        
+        result = extract_opportunity_facts("Test multi-key failover")
+        assert isinstance(result, GeminiExtractionSchema)
+        assert result.opportunity_information.company_name == "MockCorp"

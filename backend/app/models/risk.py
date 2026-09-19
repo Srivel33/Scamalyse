@@ -18,3 +18,4 @@ class RiskReport(BaseModel):
     score: int
     level: str
     triggered_signals: List[TriggeredRule]
+    safe_signals: List[TriggeredRule] = []

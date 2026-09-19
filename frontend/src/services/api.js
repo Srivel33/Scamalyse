@@ -169,12 +169,22 @@ export function transformBackendResponse(apiData, originalInput = {}) {
     }
   }
 
+  const safeSignals = (apiData.safe_signals || []).map((sig, idx) => ({
+    id: sig.rule_id || `safe-${idx + 1}`,
+    title: sig.title,
+    points: sig.points || 10,
+    confidence: sig.confidence || 'high',
+    evidence: sig.evidence_quote ? `"${sig.evidence_quote}"` : null,
+    explanation: sig.explanation,
+  }));
+
   return {
     riskScore,
     riskLevel,
     category: opportunitySummary.category,
     opportunitySummary,
     evidenceSignals,
+    safeSignals,
     extractedFacts,
     recommendedActions: apiData.recommended_actions || [
       'Independently verify the recruiter on LinkedIn and the company official careers page.',

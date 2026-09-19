@@ -1,5 +1,4 @@
 import React, { useState, useRef } from 'react';
-import { DEMO_INPUT } from '../data/mockData';
 import './AnalyseForm.css';
 
 const SOURCE_OPTIONS = [
@@ -12,7 +11,7 @@ const APPLIED_OPTIONS = [
   { value: 'not-sure', label: 'Not sure' },
 ];
 
-export default function AnalyseForm({ onSubmit, onDemo }) {
+export default function AnalyseForm({ onSubmit }) {
   const [formState, setFormState] = useState({
     text: '',
     source: '',
@@ -26,7 +25,6 @@ export default function AnalyseForm({ onSubmit, onDemo }) {
   const [validationError, setValidationError] = useState('');
   const [contextOpen, setContextOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isDemoLoading, setIsDemoLoading] = useState(false);
   const textareaRef = useRef(null);
 
   function handleChange(field, value) {
@@ -60,23 +58,6 @@ export default function AnalyseForm({ onSubmit, onDemo }) {
     }, 400);
   }
 
-  function handleDemo() {
-    setIsDemoLoading(true);
-    setFormState({
-      text: DEMO_INPUT.text,
-      source: DEMO_INPUT.source,
-      senderContact: DEMO_INPUT.senderContact,
-      appliedFirst: DEMO_INPUT.appliedFirst,
-      salaryIncentive: DEMO_INPUT.salaryIncentive,
-      unsureReason: DEMO_INPUT.unsureReason,
-    });
-    setValidationError('');
-    
-    setTimeout(() => {
-      onDemo();
-    }, 400);
-  }
-
   const contextCount = [formState.source, formState.senderContact, formState.appliedFirst, formState.salaryIncentive, formState.unsureReason].filter(Boolean).length;
 
   return (
@@ -104,7 +85,7 @@ export default function AnalyseForm({ onSubmit, onDemo }) {
         <div className="workspace-card">
           <div className="workspace-header">
             <h2 className="workspace-title">Analyse an opportunity</h2>
-            <p className="workspace-subtitle">Paste an opportunity message and Scamalyse will identify important details and warning signals.</p>
+            <p className="workspace-subtitle">Paste any offer message, email, or job post below. Scamalyse extracts facts and explains scam signals with evidence.</p>
           </div>
 
           <form onSubmit={handleSubmit} noValidate>
@@ -234,7 +215,7 @@ export default function AnalyseForm({ onSubmit, onDemo }) {
                 id="analyse-btn" 
                 type="submit" 
                 className={`btn btn-primary btn-lg ${isSubmitting ? 'is-loading' : ''}`}
-                disabled={isSubmitting || isDemoLoading}
+                disabled={isSubmitting}
                 aria-busy={isSubmitting}
               >
                 {isSubmitting ? (
@@ -245,16 +226,6 @@ export default function AnalyseForm({ onSubmit, onDemo }) {
                 ) : (
                   'Analyse opportunity'
                 )}
-              </button>
-              
-              <button
-                id="demo-btn"
-                type="button"
-                className="btn btn-outline"
-                onClick={handleDemo}
-                disabled={isSubmitting || isDemoLoading}
-              >
-                {isDemoLoading ? 'Loading demo...' : 'Try a demo offer'}
               </button>
             </div>
           </form>

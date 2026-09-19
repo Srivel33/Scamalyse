@@ -213,3 +213,75 @@ def test_unknown_values():
     report = evaluate_risk(schema)
     assert report.score == 0
     assert len(report.triggered_signals) == 0
+
+def test_training_disguised_as_internship_r12():
+    # 18. Training disguised as internship -> R12 (30 pts, HIGH)
+    schema = get_base_schema()
+    schema.training_disguised_as_internship.training_required_before_work.value = True
+    report = evaluate_risk(schema)
+    assert any(s.rule_id == "R12" for s in report.triggered_signals)
+    assert report.score == 30
+    assert report.level == "MODERATE"
+
+def test_unverified_government_collaboration_r13():
+    # 19. Unverified AICTE/Govt claim -> R13 (25 pts, HIGH)
+    schema = get_base_schema()
+    schema.institutional_endorsement.government_or_regulatory_collaboration_claimed.value = True
+    schema.institutional_endorsement.official_affiliation_verified.value = False
+    report = evaluate_risk(schema)
+    assert any(s.rule_id == "R13" for s in report.triggered_signals)
+    assert report.score == 25
+    assert report.level == "MODERATE"
+
+def test_public_form_and_vague_partner_r14_r15():
+    # 20. Google Form (R14) + Vague partners (R15)
+    schema = get_base_schema()
+    schema.application_channel.public_form_used.value = True
+    schema.application_channel.vague_partner_claims.value = True
+    report = evaluate_risk(schema)
+    assert any(s.rule_id == "R14" for s in report.triggered_signals)
+    assert any(s.rule_id == "R15" for s in report.triggered_signals)
+    assert report.score == 25  # 15 + 10 in Group C
+
+def test_student_training_scam_email_composite():
+    # 21. Real-world training-cum-internship scam email scenario:
+    # Unexpected contact (R08: 15) + Unverified AICTE (R13: 25) + Google Form (R14: 15) -> Group C capped at 35
+    # Training disguised as internship (R12: 30) -> Group D: 30
+    # Limited seats urgency (R11: 10) -> Group E: 10
+    # Total score: 35 + 30 + 10 = 75 (VERY HIGH)
+    schema = get_base_schema()
+    schema.recruitment_process.unexpected_contact.value = True
+    schema.institutional_endorsement.government_or_regulatory_collaboration_claimed.value = True
+    schema.institutional_endorsement.official_affiliation_verified.value = False
+    schema.application_channel.public_form_used.value = True
+    schema.training_disguised_as_internship.training_required_before_work.value = True
+    schema.urgency_and_pressure.urgency_present.value = True
+    
+    report = evaluate_risk(schema)
+    assert report.score == 75
+    assert report.level == "VERY HIGH"
+    rule_ids = [s.rule_id for s in report.triggered_signals]
+    assert "R08" in rule_ids
+    assert "R13" in rule_ids
+    assert "R14" in rule_ids
+    assert "R12" in rule_ids
+    assert "R11" in rule_ids
+
+def test_safe_signals_evaluation():
+    schema = get_base_schema()
+    schema.opportunity_information.company_name = "Acme Corp"
+    schema.payment_requests.payment_requested.value = False
+    schema.recruitment_process.interview_mentioned.value = True
+    schema.urgency_and_pressure.threat_or_pressure.value = False
+    schema.urgency_and_pressure.pressure_to_pay.value = False
+    schema.sensitive_information_requests.OTP.value = False
+    schema.sensitive_information_requests.password.value = False
+    schema.sensitive_information_requests.financial_credentials.value = False
+    
+    report = evaluate_risk(schema)
+    assert len(report.safe_signals) > 0
+    safe_ids = [s.rule_id for s in report.safe_signals]
+    assert "S01" in safe_ids  # No upfront fee
+    assert "S02" in safe_ids  # Structured interview
+    assert "S04" in safe_ids  # Identifiable company
+    assert "S05" in safe_ids  # Absence of threat/pressure

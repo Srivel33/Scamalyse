@@ -167,9 +167,71 @@ def evaluate_risk(schema: GeminiExtractionSchema) -> RiskReport:
         ))
         group_c_points += 15
 
-    # GROUP D - Task/Earning Patterns (Cap 40)
+    # R13 - Unverified government or institutional endorsement
+    ie = getattr(schema, "institutional_endorsement", None)
+    if ie and ie.government_or_regulatory_collaboration_claimed.value is True and ie.official_affiliation_verified.value is not True:
+        signals.append(TriggeredRule(
+            rule_id="R13",
+            title="Unverified government / institutional endorsement",
+            points=25,
+            severity="HIGH",
+            evidence=extract_evidence(ie.government_or_regulatory_collaboration_claimed),
+            explanation="The message claims collaboration with official institutions (e.g., AICTE, MSME) without an official government domain link (.gov.in / aicte-india.org). Regulatory bodies caution against unauthorized third-party commercial claims.",
+            recommended_action="Verify the program directly on the official AICTE portal (internship.aicte-india.org) before applying."
+        ))
+        group_c_points += 25
+
+    # R14 - Free public form used for corporate recruitment
+    ac = getattr(schema, "application_channel", None)
+    if ac and ac.public_form_used.value is True:
+        signals.append(TriggeredRule(
+            rule_id="R14",
+            title="Application hosted on generic free form",
+            points=15,
+            severity="MEDIUM",
+            evidence=extract_evidence(ac.public_form_used) or extract_evidence(ac.form_url),
+            explanation="The offer collects candidate applications through a free public form (e.g. Google Forms or forms.gle) rather than an official corporate careers portal or verified ATS.",
+            recommended_action="Do not provide sensitive identification or personal details via unverified public forms."
+        ))
+        group_c_points += 15
+
+    # R15 - Vague or unnamed corporate partner claims
+    if ac and ac.vague_partner_claims.value is True:
+        signals.append(TriggeredRule(
+            rule_id="R15",
+            title="Unnamed or vague corporate partner claims",
+            points=10,
+            severity="LOW",
+            evidence=extract_evidence(ac.vague_partner_claims),
+            explanation="The message references unnamed 'MNC partners' or 'corporate hiring partners' to manufacture credibility without disclosing actual hiring companies.",
+            recommended_action="Ask for the specific list of hiring partner companies and verify if they are actively recruiting through this facilitator."
+        ))
+        group_c_points += 10
+
+    # GROUP D - Task/Earning & Training Patterns (Cap 40)
     group_d_points = 0
     
+    # R12 - Training or course sales disguised as employment
+    tdi = getattr(schema, "training_disguised_as_internship", None)
+    if tdi:
+        is_training = tdi.training_required_before_work.value is True
+        is_admissions = tdi.admissions_team_sender.value is True
+        is_coursework = tdi.coursework_prerequisite_for_placement.value is True
+        if is_training or is_admissions or is_coursework:
+            evidence = (extract_evidence(tdi.training_required_before_work) or
+                        extract_evidence(tdi.admissions_team_sender) or
+                        extract_evidence(tdi.coursework_prerequisite_for_placement))
+            signals.append(TriggeredRule(
+                rule_id="R12",
+                title="Training/course sales disguised as internship",
+                points=30,
+                severity="HIGH",
+                evidence=evidence,
+                explanation="The opportunity labels itself an internship, but requires upfront training, is managed by an 'Admissions Team', or makes placement conditional on coursework. Real employers pay interns; EdTech training schemes use this lure to sell courses.",
+                recommended_action="Confirm whether fees will be charged for training, certificates, or seat reservation. Avoid paying for job training."
+            ))
+            group_d_points += 30
+
     # R04
     if ts.task_work.value is True and (ts.product_optimization.value is True or ts.product_boosting.value is True or 
                                        ts.rating_tasks.value is True or ts.liking_tasks.value is True or ts.clicking_tasks.value is True):
@@ -218,6 +280,107 @@ def evaluate_risk(schema: GeminiExtractionSchema) -> RiskReport:
         ))
         group_e_points += 10
 
+    # SAFE / TRUST SIGNALS EVALUATION
+    safe_signals: List[TriggeredRule] = []
+
+    # S01: No upfront payment requested
+    pr = schema.payment_requests
+    if pr.payment_requested.value is False:
+        safe_signals.append(TriggeredRule(
+            rule_id="S01",
+            title="No upfront payment requested",
+            points=20,
+            severity="SAFE",
+            evidence=extract_evidence(pr.payment_requested),
+            explanation="The offer does not demand any registration fees, security deposits, or paid materials upfront.",
+            recommended_action="Maintain verification."
+        ))
+
+    # S02: Structured interview or assessment process
+    rp = schema.recruitment_process
+    if rp.interview_mentioned.value is True or rp.assessment_mentioned.value is True:
+        evidence = extract_evidence(rp.interview_mentioned) or extract_evidence(rp.assessment_mentioned)
+        safe_signals.append(TriggeredRule(
+            rule_id="S02",
+            title="Structured interview / assessment process",
+            points=15,
+            severity="SAFE",
+            evidence=evidence,
+            explanation="The recruitment involves a formal evaluation or interview round rather than unconditional instant hiring.",
+            recommended_action="Prepare for your evaluation."
+        ))
+
+    # S03: Official corporate communication domain
+    oi = schema.organisation_identity
+    contact = schema.contact_information
+    has_domain = bool((oi.official_domain_claimed.value and oi.official_domain_claimed.value.lower() != "unknown") or 
+                      (contact.recruiter_email_domain.value and contact.recruiter_email_domain.value.lower() not in ["gmail.com", "yahoo.com", "outlook.com", "hotmail.com", "unknown"]))
+    if oi.personal_email_used.value is False and has_domain:
+        evidence = extract_evidence(oi.personal_email_used) or extract_evidence(oi.official_domain_claimed)
+        safe_signals.append(TriggeredRule(
+            rule_id="S03",
+            title="Official corporate communication domain",
+            points=15,
+            severity="SAFE",
+            evidence=evidence,
+            explanation="Communications originate from a dedicated corporate domain rather than a free public webmail service.",
+            recommended_action="Cross-check this domain against public registry."
+        ))
+
+    # S04: Identifiable organization name provided
+    opp_info = schema.opportunity_information
+    comp_name = opp_info.company_name.value if opp_info.company_name and hasattr(opp_info.company_name, "value") else (opp_info.company_name or oi.company_claimed.value)
+    if comp_name and str(comp_name).strip().upper() not in ["UNKNOWN", "NOT DETECTED", "NOT SPECIFIED", "NONE", ""]:
+        safe_signals.append(TriggeredRule(
+            rule_id="S04",
+            title="Identifiable organization name provided",
+            points=10,
+            severity="SAFE",
+            evidence=[],
+            explanation=f"The opportunity clearly identifies a specific entity ('{comp_name}'), enabling independent corporate registration checks.",
+            recommended_action="Verify this company independently."
+        ))
+
+    # S05: Absence of coercive threats or pressure to pay
+    up = schema.urgency_and_pressure
+    if up.threat_or_pressure.value is False and up.pressure_to_pay.value is False:
+        safe_signals.append(TriggeredRule(
+            rule_id="S05",
+            title="Absence of coercive threats or financial pressure",
+            points=10,
+            severity="SAFE",
+            evidence=[],
+            explanation="No aggressive ultimatums, legal intimidation, or coercive demands to transfer funds immediately were detected.",
+            recommended_action="Take normal time to verify."
+        ))
+
+    # S06: No sensitive credential or banking password requests
+    sens = schema.sensitive_information_requests
+    if sens.OTP.value is False and sens.password.value is False and sens.financial_credentials.value is False:
+        safe_signals.append(TriggeredRule(
+            rule_id="S06",
+            title="No premature financial or credential requests",
+            points=15,
+            severity="SAFE",
+            evidence=[],
+            explanation="The opportunity does not solicit banking passwords, OTPs, or financial account credentials.",
+            recommended_action="Keep sensitive credentials private."
+        ))
+
+    # S07: Standard professional scope
+    ts = schema.task_scam_indicators
+    fti = schema.financial_transfer_indicators
+    if ts.task_work.value is False and fti.money_transfer_request.value is False and fti.gift_card_purchase_request.value is False:
+        safe_signals.append(TriggeredRule(
+            rule_id="S07",
+            title="Standard professional / educational scope",
+            points=10,
+            severity="SAFE",
+            evidence=[],
+            explanation="No artificial task-boosting, video-liking tasks, gift-card forwarding, or recharge-to-earn mechanisms were detected.",
+            recommended_action="Focus on validating the role requirements."
+        ))
+
     # Calculate final score with caps
     capped_a = min(group_a_points, 50)
     capped_b = min(group_b_points, 40)
@@ -241,5 +404,6 @@ def evaluate_risk(schema: GeminiExtractionSchema) -> RiskReport:
     return RiskReport(
         score=final_score,
         level=level,
-        triggered_signals=signals
+        triggered_signals=signals,
+        safe_signals=safe_signals
     )

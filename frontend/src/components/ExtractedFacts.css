@@ -9,7 +9,15 @@
 }
 
 .extracted-grid {
-  /* Reuses .summary-grid and .summary-item from RiskAssessment.css */
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  background: transparent;
+  border: none;
+}
+
+.extracted-grid .summary-item:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
 }
 
 .value-warning {

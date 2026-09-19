@@ -68,6 +68,33 @@ export default function RiskAssessment({ result, onReset }) {
           </button>
         </div>
 
+        {/* ── Prominent Verdict Banner ── */}
+        <div className={`verdict-banner verdict-${(result.riskLevel || 'high').toLowerCase().replace(/\s+/g, '-')}`}>
+          <div className="verdict-badge-row">
+            <span className="verdict-icon">
+              {result.riskScore >= 50 ? '🚨' : result.riskScore >= 25 ? '⚠️' : '✅'}
+            </span>
+            <span className="verdict-title">
+              {result.riskScore >= 75
+                ? 'CRITICAL SCAM WARNING — DO NOT PROCEED'
+                : result.riskScore >= 50
+                ? 'HIGH RISK OFFER — SUSPICIOUS PATTERNS FOUND'
+                : result.riskScore >= 25
+                ? 'MODERATE RISK — INDEPENDENT VERIFICATION NEEDED'
+                : 'LOW RISK OPPORTUNITY — STANDARD RECRUITMENT'}
+            </span>
+          </div>
+          <p className="verdict-subtitle">
+            {result.riskScore >= 75
+              ? 'This opportunity contains severe predatory warning signs. Do not pay any registration, training, or deposit fees, and do not share identity documents.'
+              : result.riskScore >= 50
+              ? 'Multiple concerning signals were detected. Carefully review the red flags before applying or responding.'
+              : result.riskScore >= 25
+              ? 'Some irregular recruitment practices were detected. Verify the recruiter through official company channels.'
+              : 'No major deceptive patterns were identified from the available information. Proceed with standard career diligence.'}
+          </p>
+        </div>
+
         {/* ── Risk Header ── */}
         <div className={`risk-panel ${config.className}`}>
           <div className="risk-panel-top">
@@ -113,32 +140,94 @@ export default function RiskAssessment({ result, onReset }) {
             {Object.entries(result.opportunitySummary).map(([key, value]) => {
               // Convert camelCase to title case
               const formattedKey = key.replace(/([A-Z])/g, ' $1').toLowerCase().replace(/^./, c => c.toUpperCase());
-              const isPrimary = key === 'role';
-              const isNeutral = value.toLowerCase() === 'unknown' || value.toLowerCase() === 'not provided' || value.toLowerCase() === 'not identified';
+              const isNeutral = value && (value.toLowerCase() === 'unknown' || value.toLowerCase() === 'not provided' || value.toLowerCase() === 'not identified');
               
               return (
-                <div key={key} className={`summary-item ${isPrimary ? 'summary-primary' : ''}`}>
+                <div key={key} className="summary-item">
                   <span className="summary-key">{formattedKey}</span>
-                  <span className={`summary-value ${isNeutral ? 'value-neutral' : ''}`}>{value}</span>
+                  <span className={`summary-value ${isNeutral ? 'value-neutral' : ''}`}>{value || 'Not specified'}</span>
                 </div>
               );
             })}
           </div>
         </div>
 
-        {/* ── Evidence ── */}
+        {/* ── Core Reasons & Evidence ── */}
         <div className="result-section">
           <div className="result-section-header">
             <h2 className="result-section-title">Why this opportunity was flagged</h2>
             <p className="result-section-sub">
-              Each warning signal is linked to evidence identified in the submitted information.
+              Each warning signal is linked directly to supporting evidence quoted from the submitted text.
             </p>
           </div>
+
+          {result.evidenceSignals && result.evidenceSignals.length > 0 && (
+            <div className="key-reasons-summary">
+              <h3 className="key-reasons-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Key Flagged Reasons Summary
+              </h3>
+              <ul className="key-reasons-list">
+                {result.evidenceSignals.map((sig) => (
+                  <li key={sig.id} className="key-reason-item">
+                    <div className="reason-content">
+                      <div className="reason-header">
+                        <span className="reason-title">{sig.title}</span>
+                        <span className={`reason-pts pts-${(sig.severity || 'low').toLowerCase()}`}>+{sig.points} pts</span>
+                      </div>
+                      <p className="reason-desc">{sig.explanation}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           <div className="evidence-list stagger-children">
             {result.evidenceSignals.map((sig) => (
               <EvidenceCard key={sig.id} {...sig} riskLevel={result.riskLevel} />
             ))}
           </div>
+        </div>
+
+        {/* ── Why this opportunity may be safe / Positive signals ── */}
+        <div className="result-section">
+          <div className="result-section-header">
+            <h2 className="result-section-title">Why this opportunity may be safe</h2>
+            <p className="result-section-sub">
+              Positive trust markers and legitimate hiring indicators identified from the submitted text.
+            </p>
+          </div>
+
+          {result.safeSignals && result.safeSignals.length > 0 ? (
+            <div className="key-reasons-summary key-safe-summary">
+              <h3 className="key-reasons-title key-safe-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  <polyline points="9 12 11 14 15 10"/>
+                </svg>
+                Key Safe Indicators Summary
+              </h3>
+              <ul className="key-reasons-list">
+                {result.safeSignals.map((sig) => (
+                  <li key={sig.id} className="key-reason-item key-safe-item">
+                    <div className="reason-content">
+                      <div className="reason-header">
+                        <span className="reason-title">{sig.title}</span>
+                        <span className="reason-pts pts-safe">+{sig.points} pts</span>
+                      </div>
+                      <p className="reason-desc">{sig.explanation}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <div className="no-safe-signals-box">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <span>No verified safety signals detected in this submission. Exercise heightened caution before proceeding.</span>
+            </div>
+          )}
         </div>
 
         {/* ── Risk Calculation ── */}
@@ -173,7 +262,12 @@ export default function RiskAssessment({ result, onReset }) {
 
         {/* ── Recommended Actions ── */}
         <div className="result-section">
-          <RecommendedActions actions={result.recommendedActions} />
+          <RecommendedActions 
+            actions={result.recommendedActions}
+            company={result.opportunitySummary?.company}
+            opportunityType={result.opportunitySummary?.category}
+            evidenceSignals={result.evidenceSignals}
+          />
         </div>
 
         {/* ── Verification Info ── */}

@@ -69,15 +69,6 @@ export default function App() {
     runAnalysis(formData);
   }, [runAnalysis]);
 
-  /** Called by AnalyseForm "Try a Demo Offer" button */
-  const handleDemo = useCallback(() => {
-    setIsDemo(true);
-    progressDoneRef.current = false;
-    apiResultRef.current = HIGH_RISK_RESULT;
-    apiErrorRef.current = null;
-    setAppState('analysing');
-  }, []);
-
   /** Called by AnalysingState when all progress steps complete */
   const handleAnalysisComplete = useCallback(() => {
     progressDoneRef.current = true;
@@ -142,7 +133,7 @@ export default function App() {
 
       <main id="main-content" className="app-main">
         {appState === 'idle' && (
-          <AnalyseForm onSubmit={handleSubmit} onDemo={handleDemo} />
+          <AnalyseForm onSubmit={handleSubmit} />
         )}
 
         {appState === 'analysing' && (

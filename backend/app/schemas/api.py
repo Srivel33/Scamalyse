@@ -19,6 +19,14 @@ class TriggeredRiskSignal(BaseModel):
     evidence_quote: Optional[str]
     explanation: str
 
+class SafeRiskSignal(BaseModel):
+    rule_id: str
+    title: str
+    points: int
+    confidence: str = "high"
+    evidence_quote: Optional[str] = None
+    explanation: str
+
 class VerificationInformation(BaseModel):
     company: Optional[str] = None
     website: Optional[str] = None
@@ -36,6 +44,7 @@ class AnalysisResponse(BaseModel):
     opportunity_summary: Dict[str, Any]
     extracted_facts: Dict[str, Any]
     triggered_risk_signals: List[TriggeredRiskSignal]
+    safe_signals: List[SafeRiskSignal] = []
     recommended_actions: List[str]
     verification_information: VerificationInformation
     missing_information: MissingInformation
