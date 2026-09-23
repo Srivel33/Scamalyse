@@ -6,6 +6,49 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 /**
+ * Extracts readable text from an image/screenshot using Gemini Vision OCR.
+ *
+ * @param {File} file The image file to extract text from.
+ * @returns {Promise<string>} The extracted text content.
+ */
+export async function extractTextFromImage(file) {
+  if (!file) {
+    throw new Error('Please select an image file to extract text from.');
+  }
+
+  const formData = new FormData();
+  formData.append('screenshot', file);
+
+  const endpoint = `${API_BASE_URL}/api/v1/extract-text`;
+
+  let response;
+  try {
+    response = await fetch(endpoint, {
+      method: 'POST',
+      body: formData,
+    });
+  } catch (netErr) {
+    throw new Error(
+      'Unable to connect to Scamalyse API server. Please ensure the backend is running on http://localhost:8000.'
+    );
+  }
+
+  const responseJson = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    if (responseJson?.error?.message) {
+      throw new Error(responseJson.error.message);
+    }
+    if (responseJson?.detail) {
+      throw new Error(responseJson.detail);
+    }
+    throw new Error(`Failed to extract text from image (HTTP ${response.status}).`);
+  }
+
+  return responseJson.extracted_text || '';
+}
+
+/**
  * Sends opportunity details to the backend /api/v1/analyze endpoint.
  *
  * @param {Object} data Form input fields and optional screenshot.
@@ -14,12 +57,20 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 export async function analyzeOpportunity(data) {
   const formData = new FormData();
 
-  // Primary required text
   const opportunityText = data.text || data.opportunity_text || '';
-  if (!opportunityText.trim()) {
-    throw new Error('Please provide the opportunity message or details to analyse.');
+  const hasScreenshot = data.screenshot instanceof File;
+
+  if (!opportunityText.trim() && !hasScreenshot) {
+    throw new Error('Please paste the opportunity message or upload an image to analyse.');
   }
-  formData.append('opportunity_text', opportunityText.trim());
+
+  if (opportunityText.trim()) {
+    formData.append('opportunity_text', opportunityText.trim());
+  }
+
+  if (hasScreenshot) {
+    formData.append('screenshot', data.screenshot);
+  }
 
   // Optional contextual fields
   if (data.source) {
@@ -36,9 +87,6 @@ export async function analyzeOpportunity(data) {
   }
   if (data.unsureReason) {
     formData.append('user_concern', data.unsureReason);
-  }
-  if (data.screenshot instanceof File) {
-    formData.append('screenshot', data.screenshot);
   }
 
   const endpoint = `${API_BASE_URL}/api/v1/analyze`;
@@ -97,7 +145,7 @@ export function transformBackendResponse(apiData, originalInput = {}) {
     salaryClaim: rawSummary.salary_claim && rawSummary.salary_claim !== 'UNKNOWN'
       ? rawSummary.salary_claim
       : (originalInput.salaryIncentive || 'Not specified'),
-    source: originalInput.source || 'Submitted text',
+    source: originalInput.source || (originalInput.screenshot ? 'Uploaded screenshot' : 'Submitted text'),
   };
 
   const evidenceSignals = (apiData.triggered_risk_signals || []).map((sig, idx) => ({
@@ -142,12 +190,15 @@ export function transformBackendResponse(apiData, originalInput = {}) {
 
   const verificationInfo = {
     company: rawVerif.company || opportunitySummary.company,
-    website: rawVerif.website || 'Not provided',
+    website: rawVerif.website || (rawVerif.corporate_verification?.website_url) || 'Not provided',
     officialEmail: rawVerif.email || 'Unknown',
     officialSocials: rawVerif.social_links && rawVerif.social_links.length > 0
       ? rawVerif.social_links.join(', ')
       : 'Not identified',
     externalResearch: null,
+    corporateVerification: rawVerif.corporate_verification || null,
+    emailVerification: rawVerif.email_verification || null,
+    websiteInspection: rawVerif.website_inspection || null,
   };
 
   // Missing info clarification prompt
@@ -194,4 +245,44 @@ export function transformBackendResponse(apiData, originalInput = {}) {
     clarificationQuestion,
     analysisMetadata: apiData.analysis_metadata,
   };
+}
+
+/**
+ * Submits user feedback for a specific analysis to the backend.
+ *
+ * @param {string} analysisHash The unique hash/ID of the analysis.
+ * @param {string} feedbackType "scam", "not_scam", or "unsure".
+ * @param {string} detailedFeedback Optional detailed text.
+ * @returns {Promise<Object>} The API response JSON.
+ */
+export async function submitFeedback(analysisHash, feedbackType, detailedFeedback = '') {
+  const endpoint = `${API_BASE_URL}/api/v1/feedback`;
+
+  let response;
+  try {
+    response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        analysis_hash: analysisHash,
+        feedback_type: feedbackType,
+        detailed_feedback: detailedFeedback,
+      }),
+    });
+  } catch (netErr) {
+    throw new Error('Unable to connect to Scamalyse API server.');
+  }
+
+  const responseJson = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    if (responseJson?.detail) {
+      throw new Error(responseJson.detail);
+    }
+    throw new Error(`Failed to submit feedback (HTTP ${response.status}).`);
+  }
+
+  return responseJson;
 }

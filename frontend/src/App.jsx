@@ -128,10 +128,10 @@ export default function App() {
   const showInfoSections = appState === 'idle';
 
   return (
-    <div className="app-root">
-      <Header />
+    <div className="app-container">
+      <Header showNavLinks={appState === 'idle'} />
 
-      <main id="main-content" className="app-main">
+      <main className="main-content app-main">
         {appState === 'idle' && (
           <AnalyseForm onSubmit={handleSubmit} />
         )}

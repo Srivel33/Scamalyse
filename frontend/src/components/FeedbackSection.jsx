@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { submitFeedback } from '../services/api';
 import './FeedbackSection.css';
 
 const OPTIONS = [
@@ -7,19 +8,35 @@ const OPTIONS = [
   { id: 'unsure', label: 'Still unsure', icon: '?', colorClass: 'opt-neutral' },
 ];
 
-export default function FeedbackSection() {
+export default function FeedbackSection({ analysisHash }) {
   const [selected, setSelected] = useState(null);
   const [context, setContext] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
   function handleSelect(id) {
-    if (submitted) return;
+    if (submitted || isSubmitting) return;
     setSelected(id);
+    setError(null);
   }
 
-  function handleSubmit() {
-    if (!selected) return;
-    setSubmitted(true);
+  async function handleSubmit() {
+    if (!selected || !analysisHash) return;
+    setIsSubmitting(true);
+    setError(null);
+    try {
+      let mappedType = selected;
+      if (selected === 'suspicious') mappedType = 'scam';
+      if (selected === 'legitimate') mappedType = 'not_scam';
+      
+      await submitFeedback(analysisHash, mappedType, context);
+      setSubmitted(true);
+    } catch (err) {
+      setError(err.message || 'Failed to submit feedback.');
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -67,11 +84,13 @@ export default function FeedbackSection() {
                 id="feedback-submit-btn"
                 className="btn btn-secondary feedback-submit"
                 onClick={handleSubmit}
+                disabled={isSubmitting}
               >
-                Submit feedback
+                {isSubmitting ? 'Submitting...' : 'Submit feedback'}
               </button>
             </div>
           )}
+          {error && <p className="validation-msg" style={{marginTop: '12px'}}>{error}</p>}
         </div>
       )}
 

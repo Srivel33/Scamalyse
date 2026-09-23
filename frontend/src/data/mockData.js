@@ -110,8 +110,8 @@ export const DEMO_INPUT = {
 };
 
 export const HIGH_RISK_RESULT = {
-  riskScore: 100,
-  riskLevel: "high",
+  riskScore: 80,
+  riskLevel: "very_high",
   category: "Task Work",
   opportunitySummary: {
     company: "Unknown",
@@ -124,7 +124,7 @@ export const HIGH_RISK_RESULT = {
     {
       id: "sig-1",
       title: "Crypto / wallet payment request",
-      points: 40,
+      points: 30,
       evidence: '"Payment can be made through USDT."',
       explanation:
         "Requests for cryptocurrency payments are a strong warning signal. Legitimate employers in India do not request USDT payments for activation.",
@@ -132,7 +132,7 @@ export const HIGH_RISK_RESULT = {
     {
       id: "sig-2",
       title: "Upfront activation fee",
-      points: 35,
+      points: 20,
       evidence: '"To activate your account, pay a ₹999 registration fee."',
       explanation:
         "Legitimate employers never charge candidates for account activation or registration. This is a hallmark pattern of task-work scams.",
@@ -148,7 +148,7 @@ export const HIGH_RISK_RESULT = {
     {
       id: "sig-4",
       title: "Task-work income claim",
-      points: 25,
+      points: 20,
       evidence: '"Earn ₹3,000 every day by completing simple product optimisation tasks."',
       explanation:
         "Unusually high daily earnings for simple, unverified tasks are a common pattern in task-work opportunity scams targeting students.",
@@ -180,6 +180,43 @@ export const HIGH_RISK_RESULT = {
     officialEmail: "Unknown",
     officialSocials: "Not identified",
     externalResearch: null,
+    corporateVerification: {
+      company_name: "Amazon (Spoofed)",
+      status: "BRAND_IMPERSONATION",
+      verified: false,
+      cin: null,
+      entity_type: "Unverified Impersonator",
+      mca_status: null,
+      platforms_detected: ["Unverified Off-brand Portal"],
+      has_own_website: false,
+      website_url: null,
+      details: "The recruiter claims affiliation with Amazon India, but is not verified across official corporate registries or official career domains.",
+    },
+    emailVerification: {
+      email: "recruiter.amazon2026@gmail.com",
+      domain: "gmail.com",
+      is_free_webmail: true,
+      is_disposable: false,
+      has_mx_records: true,
+      status: "BRAND_IMPERSONATION",
+      details: "Brand Impersonation Warning: The sender claims affiliation with Amazon, but uses a public 'gmail.com' address instead of the verified enterprise domain 'amazon.com'.",
+    },
+    websiteInspection: {
+      url: "https://amazon-careers-portal.net/apply",
+      domain: "amazon-careers-portal.net",
+      domain_age_days: 9,
+      creation_date: "2026-09-11",
+      registrar: "Namecheap, Inc.",
+      status: "BRAND_IMPERSONATION",
+      is_new_domain: true,
+      is_typosquatting: true,
+      matched_brand: "Amazon",
+      details: "Brand Impersonation / Phishing Alert: The website domain 'amazon-careers-portal.net' mimics Amazon. The verified enterprise domain is 'amazon.com'.",
+      recommendations: [
+        "Never log in or share payment details on 'amazon-careers-portal.net'.",
+        "Report the fraudulent link to Amazon's official trust & safety portal."
+      ]
+    },
   },
   clarificationQuestion: {
     context: "We found a company name mention was absent.",
@@ -188,9 +225,9 @@ export const HIGH_RISK_RESULT = {
   },
 };
 
-export const MEDIUM_RISK_RESULT = {
-  riskScore: 48,
-  riskLevel: "medium",
+export const MODERATE_RISK_RESULT = {
+  riskScore: 45,
+  riskLevel: "moderate",
   category: "Internship",
   opportunitySummary: {
     company: "GreenTech Solutions Pvt. Ltd.",
@@ -219,7 +256,7 @@ export const MEDIUM_RISK_RESULT = {
     {
       id: "sig-3",
       title: "Unprompted contact",
-      points: 13,
+      points: 10,
       evidence: '"You have been directly selected based on your LinkedIn profile."',
       explanation:
         "Unsolicited direct selection without a formal application or interview can indicate low verification standards or opportunistic targeting.",
@@ -247,16 +284,53 @@ export const MEDIUM_RISK_RESULT = {
   ],
   verificationInfo: {
     company: "GreenTech Solutions Pvt. Ltd.",
-    website: "Not provided",
-    officialEmail: "hr@greentech-solutions.in (unverified)",
-    officialSocials: "LinkedIn — unverified",
+    website: "www.greentech-solutions.in",
+    officialEmail: "hr@greentech-solutions.in",
+    officialSocials: "Not identified",
     externalResearch: null,
+    corporateVerification: {
+      company_name: "GreenTech Solutions Pvt. Ltd.",
+      status: "VERIFIED_STARTUP",
+      verified: true,
+      cin: null,
+      entity_type: "Early-Stage Tech Startup",
+      mca_status: "Startup Sandbox / Pre-incorporation",
+      platforms_detected: ["GitHub Developer Org", "Startup Ecosystem (Wellfound / AngelList)", "Official Dedicated Domain"],
+      has_own_website: true,
+      website_url: "https://greentech-solutions.in",
+      details: "Found active GitHub developer organization and listed presence in verified tech startup ecosystems with a dedicated web domain.",
+    },
+    emailVerification: {
+      email: "hr@greentech-solutions.in",
+      domain: "greentech-solutions.in",
+      is_free_webmail: false,
+      is_disposable: false,
+      has_mx_records: true,
+      status: "VERIFIED_CORPORATE",
+      details: "Domain 'greentech-solutions.in' has active DNS mail exchange servers. Independent startup verification recommended.",
+    },
+    websiteInspection: {
+      url: "https://greentech-solutions.in",
+      domain: "greentech-solutions.in",
+      domain_age_days: 42,
+      creation_date: "2026-08-09",
+      registrar: "GoDaddy.com, LLC",
+      status: "STARTUP_DOMAIN",
+      is_new_domain: true,
+      is_typosquatting: false,
+      matched_brand: null,
+      details: "Early-Stage Startup Domain (registered 42 days ago): 'greentech-solutions.in' is recently registered. This is standard for legitimate new ventures. Verify founders and confirm no upfront fee is requested.",
+      recommendations: [
+        "Verify the founding team on LinkedIn or startup registries.",
+        "Ensure no security deposit or application fee is requested before starting work."
+      ]
+    },
   },
   clarificationQuestion: null,
 };
 
 export const LOW_RISK_RESULT = {
-  riskScore: 12,
+  riskScore: 10,
   riskLevel: "low",
   category: "Internship",
   opportunitySummary: {
@@ -270,7 +344,7 @@ export const LOW_RISK_RESULT = {
     {
       id: "sig-1",
       title: "No official application process mentioned",
-      points: 12,
+      points: 10,
       evidence:
         '"We reviewed your resume submitted through our careers portal and would like to invite you for an interview."',
       explanation:
@@ -302,6 +376,42 @@ export const LOW_RISK_RESULT = {
     officialSocials: "LinkedIn — Acme Corp India",
     externalResearch:
       "Company registered with MCA. LinkedIn presence with 500+ employees confirmed.",
+    corporateVerification: {
+      company_name: "Acme Corp India",
+      status: "ACTIVE",
+      verified: true,
+      cin: "U72900KA2015PTC081234",
+      entity_type: "Private Limited Company",
+      mca_status: "ACTIVE",
+      platforms_detected: ["MCA Corporate Registry (CIN Active)", "Official Corporate Domain (acmecorp.in)"],
+      has_own_website: true,
+      website_url: "https://www.acmecorp.in",
+      details: "Entity is verified as an ACTIVE registered corporate entity with Ministry of Corporate Affairs (MCA) master data.",
+    },
+    emailVerification: {
+      email: "careers@acmecorp.in",
+      domain: "acmecorp.in",
+      is_free_webmail: false,
+      is_disposable: false,
+      has_mx_records: true,
+      status: "VERIFIED_CORPORATE",
+      details: "Verified corporate email domain 'acmecorp.in' with active DNS mail exchange servers.",
+    },
+    websiteInspection: {
+      url: "https://www.acmecorp.in",
+      domain: "acmecorp.in",
+      domain_age_days: 2190,
+      creation_date: "2020-09-20",
+      registrar: "MarkMonitor Inc.",
+      status: "SAFE_ESTABLISHED",
+      is_new_domain: false,
+      is_typosquatting: false,
+      matched_brand: null,
+      details: "Established Domain (6.0 years old): 'acmecorp.in' has an active registration history with clean longevity.",
+      recommendations: [
+        "Standard diligence: Verify that the recruiter contacting you is authentically associated with this domain."
+      ]
+    },
   },
   clarificationQuestion: null,
 };
