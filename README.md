@@ -19,7 +19,7 @@ Paste any suspicious offer — Scamalyse runs it through a 5-layer forensic pipe
 
 ## 🌐 Live Demo
 
-> 🚀 **Main Live Link:** [https://scamalyse.vercel.app](https://scamalyse.vercel.app) *(paste your deployed host link here)*
+> 🚀 **Main Live Link:** [https://scamalyse.vercel.app](https://scamalyse.vercel.app)
 
 ---
 
