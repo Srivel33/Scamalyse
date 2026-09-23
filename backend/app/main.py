@@ -1,7 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.api.routes import health, analyze
+from app.api.routes import health, analyze, feedback
+from app.db.session import engine, Base
+import app.db.models  # to ensure models are registered
+
+# Initialize database tables
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -30,3 +35,4 @@ def read_root():
 # Register API routers
 app.include_router(health.router, prefix=settings.API_V1_STR, tags=["health"])
 app.include_router(analyze.router, prefix=settings.API_V1_STR, tags=["analyze"])
+app.include_router(feedback.router, prefix=settings.API_V1_STR, tags=["feedback"])

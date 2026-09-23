@@ -125,3 +125,66 @@ Submitted Content:
     raise GeminiExtractionError(
         f"AI_UNAVAILABLE: All {num_keys} configured Gemini API keys failed or exceeded limits. Last error: {str(last_exception)}"
     )
+
+def extract_text_from_file(file_bytes: bytes, mime_type: str = "image/png") -> str:
+    """
+    Extracts all visible text and details from an uploaded file (image or PDF) using Gemini.
+    Automatically cycles through configured Gemini API keys if quota/limits are reached.
+    """
+    global _active_key_index
+    keys = get_available_keys()
+    if not keys:
+        raise GeminiExtractionError("AI_UNAVAILABLE: No Gemini API keys configured.")
+
+    prompt = (
+        "Extract all readable text, email headers, sender information, job or internship offer details, "
+        "requirements, compensation, links, and contact information from this document/image verbatim. "
+        "Return strictly the extracted textual content without any introductory or conversational markdown commentary."
+    )
+
+    num_keys = len(keys)
+    start_idx = _active_key_index % num_keys
+    last_exception = None
+
+    for attempt in range(num_keys):
+        key_idx = (start_idx + attempt) % num_keys
+        active_key = keys[key_idx]
+
+        try:
+            logger.info(f"Attempting image OCR extraction with Gemini API key index {key_idx + 1}/{num_keys}...")
+            client = get_gemini_client(active_key)
+            response = client.models.generate_content(
+                model=settings.GEMINI_MODEL,
+                contents=[
+                    types.Part.from_bytes(data=file_bytes, mime_type=mime_type),
+                    prompt
+                ],
+                config=types.GenerateContentConfig(
+                    temperature=0.0,
+                )
+            )
+
+            if not response.text or not response.text.strip():
+                raise GeminiExtractionError("AI_INVALID_RESPONSE: No text could be detected or extracted from the image.")
+
+            text = response.text.strip()
+            # Clean possible markdown fence wrapping
+            if text.startswith("```") and text.endswith("```"):
+                lines = text.splitlines()
+                if len(lines) >= 3:
+                    text = "\n".join(lines[1:-1]).strip()
+
+            _active_key_index = key_idx
+            return text
+
+        except (APIError, Exception) as api_err:
+            logger.warning(
+                f"Gemini API key {key_idx + 1}/{num_keys} encountered error during image OCR: {api_err}. "
+                f"Switching to next configured API key..."
+            )
+            last_exception = api_err
+            continue
+
+    raise GeminiExtractionError(
+        f"AI_UNAVAILABLE: All {num_keys} configured Gemini API keys failed during image OCR. Last error: {str(last_exception)}"
+    )

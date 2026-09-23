@@ -1,6 +1,6 @@
 from app.schemas.gemini import GeminiExtractionSchema
 from app.models.risk import RiskReport, TriggeredRule, EvidenceQuote
-from typing import List, Optional
+from typing import List, Optional, Any, Dict
 
 def extract_evidence(schema_field) -> List[EvidenceQuote]:
     """Helper to safely extract evidence quotes from a schema field."""
@@ -8,7 +8,12 @@ def extract_evidence(schema_field) -> List[EvidenceQuote]:
         return []
     return [EvidenceQuote(quote=e.quote, source=e.source) for e in schema_field.evidence]
 
-def evaluate_risk(schema: GeminiExtractionSchema) -> RiskReport:
+def evaluate_risk(
+    schema: GeminiExtractionSchema,
+    email_report: Optional[Any] = None,
+    website_report: Optional[Any] = None,
+    corporate_report: Optional[Dict[str, Any]] = None
+) -> RiskReport:
     signals: List[TriggeredRule] = []
     
     # GROUP A - Direct Financial Harm (Cap 50)
@@ -21,26 +26,26 @@ def evaluate_risk(schema: GeminiExtractionSchema) -> RiskReport:
         signals.append(TriggeredRule(
             rule_id="R01",
             title="Upfront payment requested",
-            points=35,
+            points=20,
             severity="HIGH",
             evidence=evidence,
             explanation="The opportunity asks you to pay a fee before starting the work or accessing the platform.",
             recommended_action="Do not pay the requested fee until the opportunity has been independently verified."
         ))
-        group_a_points += 35
+        group_a_points += 20
 
     # R02
     if pr.payment_method.value in ["cryptocurrency", "wallet"]:
         signals.append(TriggeredRule(
             rule_id="R02",
             title="Cryptocurrency/wallet payment required",
-            points=40,
+            points=30,
             severity="HIGH",
             evidence=extract_evidence(pr.payment_method),
             explanation="Cryptocurrency and untraceable wallet payments are largely untraceable and frequently used to avoid banking regulations.",
             recommended_action="Do not send cryptocurrency or transfer money to unlock the opportunity. Insist on standard bank transfers."
         ))
-        group_a_points += 40
+        group_a_points += 30
 
     # R05
     ts = schema.task_scam_indicators
@@ -49,13 +54,13 @@ def evaluate_risk(schema: GeminiExtractionSchema) -> RiskReport:
         signals.append(TriggeredRule(
             rule_id="R05",
             title="User must deposit own money to work",
-            points=35,
+            points=30,
             severity="HIGH",
             evidence=evidence,
             explanation="Legitimate task platforms pay you; they do not require you to risk your own capital to work or unlock tasks.",
             recommended_action="Do not deposit your own money to unlock tasks or withdraw earnings."
         ))
-        group_a_points += 35
+        group_a_points += 30
 
     # R06
     fti = schema.financial_transfer_indicators
@@ -70,13 +75,13 @@ def evaluate_risk(schema: GeminiExtractionSchema) -> RiskReport:
         signals.append(TriggeredRule(
             rule_id="R06",
             title="Money transfer or gift-card scheme",
-            points=35,
+            points=30,
             severity="HIGH",
             evidence=evidence,
             explanation="This pattern often indicates money laundering or a fake-check scam where the initial funds will bounce.",
             recommended_action="Do not use your personal bank account to process third-party funds or purchase gift cards."
         ))
-        group_a_points += 35
+        group_a_points += 30
 
     # GROUP B - Sensitive Information (Cap 40)
     group_b_points = 0
@@ -144,13 +149,13 @@ def evaluate_risk(schema: GeminiExtractionSchema) -> RiskReport:
         signals.append(TriggeredRule(
             rule_id="R08",
             title="Unexpected recruiter contact",
-            points=15,
-            severity="MEDIUM",
+            points=10,
+            severity="LOW",
             evidence=extract_evidence(rp.unexpected_contact),
             explanation="Unsolicited casual messages offering employment are a common recruitment tactic for fraudulent schemes.",
             recommended_action="Ask where they found your profile and verify their identity."
         ))
-        group_c_points += 15
+        group_c_points += 10
 
     # R09
     # R09 must ONLY trigger if interview_mentioned is explicitly False AND there is actual evidence supporting this claim.
@@ -173,13 +178,13 @@ def evaluate_risk(schema: GeminiExtractionSchema) -> RiskReport:
         signals.append(TriggeredRule(
             rule_id="R13",
             title="Unverified government / institutional endorsement",
-            points=25,
+            points=20,
             severity="HIGH",
             evidence=extract_evidence(ie.government_or_regulatory_collaboration_claimed),
             explanation="The message claims collaboration with official institutions (e.g., AICTE, MSME) without an official government domain link (.gov.in / aicte-india.org). Regulatory bodies caution against unauthorized third-party commercial claims.",
             recommended_action="Verify the program directly on the official AICTE portal (internship.aicte-india.org) before applying."
         ))
-        group_c_points += 25
+        group_c_points += 20
 
     # R14 - Free public form used for corporate recruitment
     ac = getattr(schema, "application_channel", None)
@@ -187,13 +192,13 @@ def evaluate_risk(schema: GeminiExtractionSchema) -> RiskReport:
         signals.append(TriggeredRule(
             rule_id="R14",
             title="Application hosted on generic free form",
-            points=15,
-            severity="MEDIUM",
+            points=10,
+            severity="LOW",
             evidence=extract_evidence(ac.public_form_used) or extract_evidence(ac.form_url),
             explanation="The offer collects candidate applications through a free public form (e.g. Google Forms or forms.gle) rather than an official corporate careers portal or verified ATS.",
             recommended_action="Do not provide sensitive identification or personal details via unverified public forms."
         ))
-        group_c_points += 15
+        group_c_points += 10
 
     # R15 - Vague or unnamed corporate partner claims
     if ac and ac.vague_partner_claims.value is True:
@@ -207,6 +212,84 @@ def evaluate_risk(schema: GeminiExtractionSchema) -> RiskReport:
             recommended_action="Ask for the specific list of hiring partner companies and verify if they are actively recruiting through this facilitator."
         ))
         group_c_points += 10
+
+    # R16, R17, R18: Email & Domain Intelligence
+    if email_report:
+        if getattr(email_report, "brand_impersonation_detected", False):
+            brand = getattr(email_report, "impersonated_brand", "Enterprise Brand")
+            expected = getattr(email_report, "expected_domain", "official domain")
+            signals.append(TriggeredRule(
+                rule_id="R17",
+                title=f"Brand impersonation / lookalike domain ({brand})",
+                points=30,
+                severity="HIGH",
+                evidence=[EvidenceQuote(quote=getattr(email_report, "email", ""), source="submitted_email")],
+                explanation=getattr(email_report, "details", f"Claims to represent {brand} but uses an unverified or lookalike domain."),
+                recommended_action=f"Do not respond to this address. Verify opportunities directly at {expected}."
+            ))
+            group_c_points += 30
+        elif getattr(email_report, "status", "") == "INVALID_MX":
+            signals.append(TriggeredRule(
+                rule_id="R16",
+                title="Invalid or non-existent mail server domain",
+                points=20,
+                severity="HIGH",
+                evidence=[EvidenceQuote(quote=getattr(email_report, "email", ""), source="submitted_email")],
+                explanation=getattr(email_report, "details", "The sender email domain has no working DNS mail servers (MX records)."),
+                recommended_action="Check the sender's exact email spelling. Legitimate employers operate configured mail servers."
+            ))
+            group_c_points += 20
+        elif getattr(email_report, "status", "") == "DISPOSABLE":
+            signals.append(TriggeredRule(
+                rule_id="R18",
+                title="Temporary / disposable email service used",
+                points=30,
+                severity="HIGH",
+                evidence=[EvidenceQuote(quote=getattr(email_report, "email", ""), source="submitted_email")],
+                explanation=getattr(email_report, "details", "The sender uses an anonymous temporary mailbox service."),
+                recommended_action="Discontinue communication. Legitimate employers do not communicate via disposable inboxes."
+            ))
+            group_c_points += 30
+
+    # R19, R20, R21: Website & Domain Threat Intelligence
+    if website_report:
+        web_status = getattr(website_report, "status", "")
+        web_domain = getattr(website_report, "domain", "submitted_link")
+        
+        if web_status == "BRAND_IMPERSONATION" or getattr(website_report, "is_typosquatting", False):
+            matched = getattr(website_report, "matched_brand", "Enterprise Brand")
+            signals.append(TriggeredRule(
+                rule_id="R19",
+                title=f"Phishing / Lookalike website domain ({matched})",
+                points=30,
+                severity="HIGH",
+                evidence=[EvidenceQuote(quote=getattr(website_report, "url", web_domain), source="submitted_link")],
+                explanation=getattr(website_report, "details", f"The website domain '{web_domain}' mimics {matched}."),
+                recommended_action=f"Do not enter passwords, personal data, or credentials on '{web_domain}'."
+            ))
+            group_c_points += 30
+        elif web_status == "NEW_DOMAIN_WARNING":
+            signals.append(TriggeredRule(
+                rule_id="R20",
+                title="Established brand claimed on newly created domain",
+                points=20,
+                severity="HIGH",
+                evidence=[EvidenceQuote(quote=getattr(website_report, "url", web_domain), source="submitted_link")],
+                explanation=getattr(website_report, "details", "The domain was registered recently while claiming to represent an established brand."),
+                recommended_action="Always apply directly through the company's verified corporate website."
+            ))
+            group_c_points += 20
+        elif web_status == "SUSPICIOUS_HOSTING":
+            signals.append(TriggeredRule(
+                rule_id="R21",
+                title="Free staging / high-abuse web domain used",
+                points=15,
+                severity="MEDIUM",
+                evidence=[EvidenceQuote(quote=getattr(website_report, "url", web_domain), source="submitted_link")],
+                explanation=getattr(website_report, "details", "Uses a free hosting subdomain or high-abuse TLD rather than an established enterprise portal."),
+                recommended_action="Confirm the organization's verified commercial presence before proceeding."
+            ))
+            group_c_points += 15
 
     # GROUP D - Task/Earning & Training Patterns (Cap 40)
     group_d_points = 0
@@ -242,10 +325,28 @@ def evaluate_risk(schema: GeminiExtractionSchema) -> RiskReport:
             points=30,
             severity="HIGH",
             evidence=evidence,
-            explanation="Paying users directly to blindly like content or rate products is a well-known structure for task-based fraud.",
-            recommended_action="Research 'task scams' and avoid participating in metric manipulation."
+            explanation="Paying users to blindly like content, rate products, or click ads is the defining structure of task-based fraud (Telegram/WhatsApp earning scams).",
+            recommended_action="Do not engage. This is a well-documented scam format. Research 'task scam' or 'part-time WhatsApp job scam'."
         ))
         group_d_points += 30
+
+    # R04b - Informal/social-media contact channel used for recruitment
+    rp = schema.recruitment_process
+    if getattr(rp, "unexpected_contact", None) and rp.unexpected_contact.value is True:
+        # Check if the text contains informal platform keywords
+        raw = getattr(schema, "raw_text", "") or ""
+        informal_platforms = ["telegram", "whatsapp", "instagram", "t.me", "wa.me", "@"]
+        if any(p in raw.lower() for p in informal_platforms):
+            signals.append(TriggeredRule(
+                rule_id="R04b",
+                title="Recruitment via informal channel (Telegram/WhatsApp)",
+                points=20,
+                severity="HIGH",
+                evidence=extract_evidence(rp.unexpected_contact),
+                explanation="Legitimate employers recruit through official career portals and corporate emails — not Telegram handles or WhatsApp group links.",
+                recommended_action="Apply only through official verified career pages. Never share documents via WhatsApp/Telegram."
+            ))
+            group_d_points += 20
         
     # R10
     comp = schema.compensation
@@ -254,13 +355,13 @@ def evaluate_risk(schema: GeminiExtractionSchema) -> RiskReport:
         signals.append(TriggeredRule(
             rule_id="R10",
             title="Guaranteed or unrealistic earning claims",
-            points=15,
-            severity="MEDIUM",
+            points=10,
+            severity="LOW",
             evidence=evidence,
             explanation="Extremely high compensation for unskilled, low-effort work is often used as a lure.",
             recommended_action="Compare the offered compensation with industry standards for similar work."
         ))
-        group_d_points += 15
+        group_d_points += 10
 
     # GROUP E - Pressure/Urgency (Cap 20)
     group_e_points = 0
@@ -280,6 +381,78 @@ def evaluate_risk(schema: GeminiExtractionSchema) -> RiskReport:
         ))
         group_e_points += 10
 
+    # GROUP F - Deep OSINT Web Scraping (Cap 40)
+    group_f_points = 0
+    wca = getattr(schema, "website_content_analysis", None)
+    if wca:
+        # R22: Website Content Mismatch
+        if wca.content_matches_claimed_company.value is False:
+            signals.append(TriggeredRule(
+                rule_id="R22",
+                title="Website content mismatch",
+                points=30,
+                severity="HIGH",
+                evidence=extract_evidence(wca.content_matches_claimed_company),
+                explanation="The content found on the target website does not match the company the recruiter claims to represent.",
+                recommended_action="Do not proceed. The recruiter is likely using a deceptive or stolen domain."
+            ))
+            group_f_points += 30
+
+        # R23: Deep OSINT Brand Impersonation
+        if wca.brand_impersonation_detected.value is True:
+            signals.append(TriggeredRule(
+                rule_id="R23",
+                title="Website brand impersonation (Deep OSINT)",
+                points=30,
+                severity="HIGH",
+                evidence=extract_evidence(wca.brand_impersonation_detected),
+                explanation="The website content falsely claims to be a major enterprise brand, but the domain does not belong to them.",
+                recommended_action="Close the website immediately. Do not enter any credentials."
+            ))
+            group_f_points += 30
+            
+        # R24: Suspicious / Template Content
+        if wca.suspicious_scraped_content.value is True:
+            signals.append(TriggeredRule(
+                rule_id="R24",
+                title="Suspicious or template website content",
+                points=20,
+                severity="MEDIUM",
+                evidence=extract_evidence(wca.suspicious_scraped_content),
+                explanation="The website contains generic placeholder text (Lorem Ipsum), obvious crypto-scam templates, or lacks legitimate corporate information.",
+                recommended_action="Avoid submitting any personal details to this platform."
+            ))
+            group_f_points += 20
+    # GROUP G - Corporate Identity (Cap 50)
+    group_g_points = 0
+    if corporate_report:
+        status = corporate_report.get("status")
+        if status == "STRUCK_OFF":
+            signals.append(TriggeredRule(
+                rule_id="R26",
+                title="Struck Off / Fraudulent Entity",
+                points=30,
+                severity="HIGH",
+                evidence=[],
+                explanation=corporate_report.get("details", "This entity is marked as fraudulent or dissolved in the corporate registry."),
+                recommended_action="Cease all communication immediately."
+            ))
+            group_g_points += 30
+        elif status == "UNREGISTERED":
+            # Only penalize if a specific company name was actually provided and context is job-related
+            company_name = corporate_report.get("company_name", "")
+            if company_name and company_name.upper() not in ["UNKNOWN", "NOT SPECIFIED", "N/A", "NONE", ""]:
+                signals.append(TriggeredRule(
+                    rule_id="R25",
+                    title=f"Unregistered Corporate Entity: '{company_name}'",
+                    points=15,
+                    severity="LOW",
+                    evidence=[],
+                    explanation=f"The entity '{company_name}' could not be definitively found in the major corporate registry. Please verify local registration documents.",
+                    recommended_action="Ask for their official Corporate Identification Number (CIN) or tax registration documents."
+                ))
+                group_g_points += 15
+
     # SAFE / TRUST SIGNALS EVALUATION
     safe_signals: List[TriggeredRule] = []
 
@@ -289,7 +462,7 @@ def evaluate_risk(schema: GeminiExtractionSchema) -> RiskReport:
         safe_signals.append(TriggeredRule(
             rule_id="S01",
             title="No upfront payment requested",
-            points=20,
+            points=15,
             severity="SAFE",
             evidence=extract_evidence(pr.payment_requested),
             explanation="The offer does not demand any registration fees, security deposits, or paid materials upfront.",
@@ -381,22 +554,69 @@ def evaluate_risk(schema: GeminiExtractionSchema) -> RiskReport:
             recommended_action="Focus on validating the role requirements."
         ))
 
-    # Calculate final score with caps
+    # S08: Verified corporate mail server
+    if email_report and getattr(email_report, "status", "") == "VERIFIED_CORPORATE" and not getattr(email_report, "brand_impersonation_detected", False):
+        domain = getattr(email_report, "domain", "corporate domain")
+        mx_hosts = getattr(email_report, "mx_hosts", [])
+        mx_desc = f" ({', '.join(mx_hosts[:2])})" if mx_hosts else ""
+        safe_signals.append(TriggeredRule(
+            rule_id="S08",
+            title=f"Verified corporate mail server ({domain})",
+            points=15,
+            severity="SAFE",
+            evidence=[EvidenceQuote(quote=getattr(email_report, "email", ""), source="submitted_email")],
+            explanation=f"Sender domain '{domain}' has active, valid DNS mail exchange servers{mx_desc}.",
+            recommended_action="Cross-reference with official corporate careers page."
+        ))
+
+    # S09: Established corporate website domain (> 1 year old, clean WHOIS longevity)
+    if website_report and getattr(website_report, "status", "") == "SAFE_ESTABLISHED":
+        dom = getattr(website_report, "domain", "corporate domain")
+        age_days = getattr(website_report, "domain_age_days", 0)
+        years = round(age_days / 365, 1) if age_days else 1
+        safe_signals.append(TriggeredRule(
+            rule_id="S09",
+            title=f"Established website domain ({dom})",
+            points=10,
+            severity="SAFE",
+            evidence=[EvidenceQuote(quote=getattr(website_report, "url", dom), source="submitted_link")],
+            explanation=f"Domain '{dom}' has an active registration history of over {years} years, indicating established corporate infrastructure rather than disposable phishing.",
+            recommended_action="Verify that the recruiter is authentically affiliated with this established domain."
+        ))
+    # S10: Verified Corporate Entity or Verified Startup
+    if corporate_report and corporate_report.get("status") in ["ACTIVE", "VERIFIED_STARTUP"]:
+        is_startup = corporate_report.get("status") == "VERIFIED_STARTUP"
+        platforms = corporate_report.get("platforms_detected", [])
+        platform_tag = f" ({platforms[0]})" if platforms else ""
+        title = f"Verified Tech Startup{platform_tag}" if is_startup else f"Verified Corporate Entity{platform_tag}"
+        safe_signals.append(TriggeredRule(
+            rule_id="S10",
+            title=title,
+            points=15,
+            severity="SAFE",
+            evidence=[],
+            explanation=corporate_report.get("details", "The company is verified as an active, legitimate entity in corporate or startup ecosystems."),
+            recommended_action="Proceed with normal diligence."
+        ))
+
+    # Calculate final score with standardized group caps
     capped_a = min(group_a_points, 50)
-    capped_b = min(group_b_points, 40)
-    capped_c = min(group_c_points, 35)
-    capped_d = min(group_d_points, 40)
+    capped_b = min(group_b_points, 30)
+    capped_c = min(group_c_points, 30)
+    capped_d = min(group_d_points, 30)
     capped_e = min(group_e_points, 20)
+    capped_f = min(group_f_points, 30)
+    capped_g = min(group_g_points, 30)
     
-    final_score = capped_a + capped_b + capped_c + capped_d + capped_e
+    final_score = capped_a + capped_b + capped_c + capped_d + capped_e + capped_f + capped_g
     final_score = min(final_score, 100)
     
     # Determine risk level
-    if final_score <= 24:
+    if final_score <= 19:
         level = "LOW"
     elif final_score <= 49:
         level = "MODERATE"
-    elif final_score <= 74:
+    elif final_score <= 69:
         level = "HIGH"
     else:
         level = "VERY HIGH"

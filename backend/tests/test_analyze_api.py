@@ -12,7 +12,10 @@ client = TestClient(app)
 
 def get_base_schema():
     import copy
-    return GeminiExtractionSchema(**copy.deepcopy(VALID_MOCK_RESPONSE))
+    data = copy.deepcopy(VALID_MOCK_RESPONSE)
+    data["opportunity_information"]["company_name"] = "Google"
+    data["organisation_identity"]["company_claimed"]["value"] = "Google"
+    return GeminiExtractionSchema(**data)
     
 @patch("app.api.routes.analyze.extract_opportunity_facts")
 def test_normal_internship(mock_extract):
@@ -41,7 +44,7 @@ def test_registration_fee(mock_extract):
     response = client.post("/api/v1/analyze", data={"opportunity_text": "An internship asking for ₹999 registration/activation fee."})
     assert response.status_code == 200
     data = response.json()
-    assert data["risk_indicator"]["score"] == 35
+    assert data["risk_indicator"]["score"] == 20
     assert data["risk_indicator"]["level"] == "MODERATE"
     assert len(data["triggered_risk_signals"]) > 0
     assert any(s["rule_id"] == "R01" for s in data["triggered_risk_signals"])
@@ -61,11 +64,11 @@ def test_high_risk_task_scam(mock_extract):
     response = client.post("/api/v1/analyze", data={"opportunity_text": "Unexpected whatsapp product optimisation work, ₹3,000/day, ₹999 activation fee, USDT payment."})
     assert response.status_code == 200
     data = response.json()
-    # Group A: 35 (R01) + 40 (R02) = 75 -> cap at 50
-    # Group C: 15 (R08)
+    # Group A: 20 (R01) + 30 (R02) = 50 -> cap at 50
+    # Group C: 10 (R08)
     # Group D: 30 (R04)
-    # Total: 95
-    assert data["risk_indicator"]["score"] == 95
+    # Total: 90
+    assert data["risk_indicator"]["score"] == 90
     assert data["risk_indicator"]["level"] == "VERY HIGH"
 
 @patch("app.api.routes.analyze.extract_opportunity_facts")
@@ -84,7 +87,8 @@ def test_fake_internship(mock_extract):
     
     response = client.post("/api/v1/analyze", data={"opportunity_text": "Gmail recruiter, instant selection, registration fee, explicit no interview required."})
     data = response.json()
-    assert data["risk_indicator"]["score"] == 70  # 35 (R01) + 20 (R07) + 15 (R09) = 70 (HIGH)
+    # Group A: 20 (R01), Group C: 20 (R07) + 15 (R09) = 35 -> capped at 30. Total: 50 (HIGH)
+    assert data["risk_indicator"]["score"] == 50
     assert data["risk_indicator"]["level"] == "HIGH"
 
 @patch("app.api.routes.analyze.extract_opportunity_facts")
@@ -93,6 +97,7 @@ def test_missing_information(mock_extract):
     schema = get_base_schema()
     schema.payment_requests.payment_requested.value = "unknown"
     schema.opportunity_information.company_name = None
+    schema.organisation_identity.company_claimed.value = None
     mock_extract.return_value = schema
     
     response = client.post("/api/v1/analyze", data={"opportunity_text": "Hi, I have a job opportunity for you. Earn good money from home."})
@@ -141,3 +146,31 @@ def test_unsupported_screenshot_type():
         response = client.post("/api/v1/analyze", data={"opportunity_text": "Valid length input text."}, files={"screenshot": ("test.py", f, "text/plain")})
     assert response.status_code == 400
     assert response.json()["error"]["code"] == "UNSUPPORTED_FILE"
+
+@patch("app.api.routes.analyze.extract_text_from_file")
+def test_extract_text_endpoint(mock_ocr):
+    mock_ocr.return_value = "Extracted internship offer text from screenshot."
+    fake_image = io.BytesIO(b"fake image bytes")
+    response = client.post(
+        "/api/v1/extract-text",
+        files={"screenshot": ("test.png", fake_image, "image/png")}
+    )
+    assert response.status_code == 200
+    assert response.json()["extracted_text"] == "Extracted internship offer text from screenshot."
+
+@patch("app.api.routes.analyze.extract_text_from_file")
+@patch("app.api.routes.analyze.extract_opportunity_facts")
+def test_analyze_with_image_only(mock_extract, mock_ocr):
+    from tests.test_gemini import VALID_MOCK_RESPONSE
+    mock_ocr.return_value = "Legitimate software engineer internship offer at Google."
+    mock_extract.return_value = GeminiExtractionSchema(**VALID_MOCK_RESPONSE)
+    
+    fake_image = io.BytesIO(b"fake image bytes")
+    response = client.post(
+        "/api/v1/analyze",
+        data={},  # No text provided
+        files={"screenshot": ("offer.png", fake_image, "image/png")}
+    )
+    assert response.status_code == 200
+    assert "risk_indicator" in response.json()
+    assert response.json()["extracted_text"] == "Legitimate software engineer internship offer at Google."

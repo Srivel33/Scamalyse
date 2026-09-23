@@ -216,6 +216,20 @@ class ApplicationChannel(BaseModel):
         default_factory=lambda: EvidenceBoolean(value="unknown", confidence="low", evidence=[])
     )
 
+class WebsiteContentAnalysis(BaseModel):
+    content_matches_claimed_company: EvidenceBoolean = Field(
+        default_factory=lambda: EvidenceBoolean(value="unknown", confidence="low", evidence=[])
+    )
+    brand_impersonation_detected: EvidenceBoolean = Field(
+        default_factory=lambda: EvidenceBoolean(value="unknown", confidence="low", evidence=[])
+    )
+    suspicious_scraped_content: EvidenceBoolean = Field(
+        default_factory=lambda: EvidenceBoolean(value="unknown", confidence="low", evidence=[])
+    )
+    scraped_company_name: EvidenceString = Field(
+        default_factory=lambda: EvidenceString(value=None, confidence="low", evidence=[])
+    )
+
 class GeminiExtractionSchema(BaseModel):
     opportunity_information: OpportunityInformation
     compensation: Compensation
@@ -235,5 +249,8 @@ class GeminiExtractionSchema(BaseModel):
     )
     application_channel: Optional[ApplicationChannel] = Field(
         default_factory=ApplicationChannel
+    )
+    website_content_analysis: Optional[WebsiteContentAnalysis] = Field(
+        default_factory=WebsiteContentAnalysis
     )
 
