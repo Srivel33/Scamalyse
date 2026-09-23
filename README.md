@@ -17,16 +17,9 @@ Paste any suspicious offer — Scamalyse runs it through a 5-layer forensic pipe
 
 ---
 
-## 🌐 Live Hosted Links
+## 🌐 Live Demo
 
-> **Deployment Status:** Production-ready. Update with your active cloud instances once live.
-
-| Service | Platform | Link / Host URL |
-| :--- | :---: | :--- |
-| 🌐 **Frontend Web App** | [Vercel](https://vercel.com) | `https://scamalyse.vercel.app` *(add your deployed Vercel URL here)* |
-| ⚡ **Backend REST API** | [Render](https://render.com) | `https://scamalyse-api.onrender.com` *(add your deployed Render URL here)* |
-| 📖 **Interactive API Docs** | Render / FastAPI | `https://scamalyse-api.onrender.com/docs` *(Swagger UI)* |
-| 🧩 **Chrome Extension** | Chrome Web Store / Local | Unpacked in [`frontend/extension/`](frontend/extension/) |
+> 🚀 **Main Live Link:** [https://scamalyse.vercel.app](https://scamalyse.vercel.app) *(paste your deployed host link here)*
 
 ---
 
