@@ -2,17 +2,19 @@
   "manifest_version": 3,
   "name": "Scamalyse Shield",
   "version": "1.0",
-  "description": "Scan highlighted job postings and emails for scams instantly using the Scamalyse Risk Engine.",
+  "description": "Detect fake internship and job offer scams instantly. Paste any suspicious message or scan the active tab — powered by the Scamalyse AI forensic engine.",
   "permissions": [
     "activeTab",
-    "scripting"
+    "scripting",
+    "clipboardWrite"
   ],
   "host_permissions": [
-    "http://127.0.0.1:8000/*"
+    "http://127.0.0.1:8000/*",
+    "https://scamalyse-api.onrender.com/*"
   ],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Scan with Scamalyse"
+    "default_title": "Scamalyse Shield — Scan for Scams"
   },
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'"

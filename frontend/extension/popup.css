@@ -250,6 +250,12 @@ body {
   text-decoration: underline;
 }
 
+.input-hint-text {
+  font-size: 0.68rem;
+  color: var(--text-faint);
+  font-style: italic;
+}
+
 /* ── Tab Content: Page Scan ── */
 .page-scan-card {
   background: var(--surface-dark);
@@ -344,6 +350,14 @@ body {
 @keyframes radarRotate {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+.radar-sweep {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 80%, rgba(46, 196, 182, 0.35) 100%);
+  animation: radarRotate 2s linear infinite;
 }
 
 .radar-center-shield {

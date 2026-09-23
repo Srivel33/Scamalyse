@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const panelPage = document.getElementById('panel-page');
 
   const manualInput = document.getElementById('manual-input');
-  const trySampleBtn = document.getElementById('try-sample-btn');
+  // try-sample-btn removed (no demo text in production)
   const clearInputBtn = document.getElementById('clear-input-btn');
   const scanPastedBtn = document.getElementById('scan-pasted-btn');
   const scanPageBtn = document.getElementById('scan-page-btn');
@@ -56,14 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
     hideError();
   });
 
-  // ── Sample Loader & Clear ──
-  const SAMPLE_TEXT = `URGENT: Offer for Remote Research Assistant Intern at Apex Analytics! Earn ₹4,000/day. Immediate selection without formal interview. Pay ₹999 security deposit for confidential task materials. Connect on Telegram @apex_analytics_hr.`;
-
-  trySampleBtn.addEventListener('click', () => {
-    manualInput.value = SAMPLE_TEXT;
-    manualInput.focus();
-  });
-
+  // ── Clear Input ──
   clearInputBtn.addEventListener('click', () => {
     manualInput.value = '';
     manualInput.focus();
@@ -149,7 +142,12 @@ document.addEventListener('DOMContentLoaded', () => {
     formData.append('opportunity_text', text);
     if (url) formData.append('sender_website', url);
 
-    const response = await fetch('http://127.0.0.1:8000/api/v1/analyze', {
+    // Use VITE env var if available (dev), otherwise use production backend
+    const BASE = (typeof SCAMALYSE_API_URL !== 'undefined' && SCAMALYSE_API_URL)
+      ? SCAMALYSE_API_URL
+      : 'https://scamalyse-api.onrender.com';
+
+    const response = await fetch(`${BASE}/api/v1/analyze`, {
       method: 'POST',
       body: formData,
     });
@@ -178,21 +176,26 @@ document.addEventListener('DOMContentLoaded', () => {
     riskLevelBadge.className = 'level-badge';
     meterBarFill.style.width = `${Math.min(Math.max(score, 4), 100)}%`;
 
-    if (score >= 60 || level === 'HIGH' || level === 'VERY HIGH') {
-      riskLevelBadge.textContent = '🚨 HIGH RISK';
+    if (score >= 70 || level === 'VERY HIGH') {
+      riskLevelBadge.textContent = '🚨 VERY HIGH RISK';
+      riskLevelBadge.classList.add('badge-danger');
+      meterBarFill.style.backgroundColor = '#DC2626';
+      riskSummaryText.textContent = 'Strong scam evidence detected. Do not engage or pay.';
+    } else if (score >= 50 || level === 'HIGH') {
+      riskLevelBadge.textContent = '🔴 HIGH RISK';
       riskLevelBadge.classList.add('badge-danger');
       meterBarFill.style.backgroundColor = '#EF4444';
-      riskSummaryText.textContent = 'High probability of deceptive or predatory tactics.';
-    } else if (score >= 25 || level === 'MODERATE') {
-      riskLevelBadge.textContent = '⚠️ MODERATE';
+      riskSummaryText.textContent = 'Multiple serious fraud indicators. Extreme caution advised.';
+    } else if (score >= 20 || level === 'MODERATE') {
+      riskLevelBadge.textContent = '⚠️ MODERATE RISK';
       riskLevelBadge.classList.add('badge-warning');
       meterBarFill.style.backgroundColor = '#F59E0B';
-      riskSummaryText.textContent = 'Some warning signals found. Verify claims independently.';
+      riskSummaryText.textContent = 'Warning signals found. Verify claims independently.';
     } else {
       riskLevelBadge.textContent = '🛡️ LOW RISK';
       riskLevelBadge.classList.add('badge-safe');
       meterBarFill.style.backgroundColor = '#10B981';
-      riskSummaryText.textContent = 'Standard recruitment language identified.';
+      riskSummaryText.textContent = 'Standard recruitment language. Proceed with normal caution.';
     }
 
     // 3. Counts
