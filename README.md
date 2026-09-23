@@ -17,6 +17,19 @@ Paste any suspicious offer — Scamalyse runs it through a 5-layer forensic pipe
 
 ---
 
+## 🌐 Live Hosted Links
+
+> **Deployment Status:** Production-ready. Update with your active cloud instances once live.
+
+| Service | Platform | Link / Host URL |
+| :--- | :---: | :--- |
+| 🌐 **Frontend Web App** | [Vercel](https://vercel.com) | `https://scamalyse.vercel.app` *(add your deployed Vercel URL here)* |
+| ⚡ **Backend REST API** | [Render](https://render.com) | `https://scamalyse-api.onrender.com` *(add your deployed Render URL here)* |
+| 📖 **Interactive API Docs** | Render / FastAPI | `https://scamalyse-api.onrender.com/docs` *(Swagger UI)* |
+| 🧩 **Chrome Extension** | Chrome Web Store / Local | Unpacked in [`frontend/extension/`](frontend/extension/) |
+
+---
+
 ## What is Scamalyse?
 
 Every year, thousands of students and fresh graduates in India lose money to fake internship and job offers — fake companies, upfront "security deposits", task-completion scams, and phishing links disguised as career opportunities.
@@ -44,6 +57,47 @@ Scamalyse is a forensic analysis tool that catches these scams **before** you ap
 | 🧩 **Chrome Extension** | Scan any job page or paste directly from LinkedIn / WhatsApp / email |
 | 🗄️ **Response Cache** | SHA-256 deduplication cache in SQLite — identical requests return instantly |
 | 💬 **Feedback Loop** | Users can flag false positives / negatives to improve future accuracy |
+
+---
+
+## 📸 Screenshots
+
+<div align="center">
+
+### 1. Hero & Forensic Scanner
+*Modern dark-mode interface introducing the 5-layer forensic engine and threat telemetry.*  
+<br/>
+<img src="Screenshots/01_hero_landing.png" alt="Scamalyse Landing Page" width="880"/>
+
+<br/><br/>
+
+### 2. Job Offer Submission Form
+*Analyze offer messages by pasting text or uploading screenshots, images, and PDF offer letters.*  
+<br/>
+<img src="Screenshots/02_analyse_form.png" alt="Scamalyse Analysis Form" width="880"/>
+
+<br/><br/>
+
+### 3. Risk Assessment & Threat Probability
+*Deterministic 0–100 threat score gauge, risk level classification, and extracted role metadata.*  
+<br/>
+<img src="Screenshots/03_threat_score_overview.png" alt="Threat Probability Score" width="880"/>
+
+<br/><br/>
+
+### 4. Forensic Evidence & Rule Findings
+*Transparent audit trail highlighting flagged scam clauses (+pts) alongside verified trust factors (-pts).*  
+<br/>
+<img src="Screenshots/04_evidence_findings.png" alt="Forensic Evidence and Findings" width="880"/>
+
+<br/><br/>
+
+### 5. Multi-Platform OSINT & Domain Intelligence
+*Live company registry verification (MCA, GitHub, Wellfound, YC) and domain WHOIS/DNS security analysis.*  
+<br/>
+<img src="Screenshots/05_osint_verification.png" alt="Corporate OSINT & Domain Intelligence" width="880"/>
+
+</div>
 
 ---
 
@@ -104,8 +158,9 @@ Scamalyse/
 │   │       ├── risk_engine.py          # Layer 5 — Deterministic risk scoring
 │   │       └── web_scraper.py          # Deep OSINT — live website content scraping
 │   ├── tests/                      # 73 pytest unit tests (all passing)
-│   ├── requirements.txt
-│   ├── run.py
+│   ├── requirements.txt            # Python dependencies
+│   ├── run.py                      # Startup script: python run.py (port 8000 / $PORT)
+│   ├── Procfile                    # Web process: python run.py
 │   └── .env.example
 │
 ├── frontend/                       # React + Vite web app
@@ -121,6 +176,14 @@ Scamalyse/
 │   ├── package.json
 │   └── vite.config.js
 │
+├── Screenshots/                    # Application UI screenshots
+│   ├── 01_hero_landing.png
+│   ├── 02_analyse_form.png
+│   ├── 03_threat_score_overview.png
+│   ├── 04_evidence_findings.png
+│   └── 05_osint_verification.png
+│
+├── LICENSE                         # MIT License (Srivel, 2026)
 ├── .env.example                    # Template — copy to backend/.env and fill in keys
 ├── .gitignore
 └── README.md
@@ -219,11 +282,11 @@ Located in `frontend/extension/`. Loads as a **Manifest V3** Chrome extension.
 
 ## Deployment
 
-| Component | Platform | Notes |
+| Component | Platform | Configuration & Startup Command |
 | :--- | :--- | :--- |
-| Backend | [Render.com](https://render.com) | Root dir: `backend`, Start: `uvicorn app.main:app --host 0.0.0.0 --port $PORT` |
-| Frontend | [Vercel](https://vercel.com) | Root dir: `frontend`, set `VITE_API_BASE_URL` to your Render URL |
-| Database | SQLite (default) or [Neon.tech](https://neon.tech) PostgreSQL | Set `DATABASE_URL` env var for Postgres |
+| **Backend** | [Render.com](https://render.com) | Root dir: `backend`, Build: `pip install -r requirements.txt`, Start: `python run.py` |
+| **Frontend** | [Vercel](https://vercel.com) | Root dir: `frontend`, Build: `npm run build`, env: `VITE_API_BASE_URL` |
+| **Database** | SQLite (default) or [Neon.tech](https://neon.tech) PostgreSQL | Set `DATABASE_URL` env var on Render for Postgres |
 
 ---
 
